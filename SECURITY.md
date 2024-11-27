@@ -10,7 +10,7 @@ Submit your findings by creating a new issue in the GitHub repository's issue tr
 Clearly describe the vulnerability with detailed steps to reproduce the issue.
 Provide any additional information or tools necessary to reproduce or validate the vulnerability.
 Please refrain from disclosing the vulnerability publicly until we have had an opportunity to investigate and address it.
-We will acknowledge your submission and provide an estimated timeline for when we expect to address the reported issue. We appreciate your patience and cooperation throughout the process.
+We will acknowledge your submission within [TIMEFRAME] and provide an estimated timeline for when we expect to address the reported issue. We appreciate your patience and cooperation throughout the process.
 
 ## Bug Bounty Program
 At this time, we do not offer a bug bounty program for this plugin.

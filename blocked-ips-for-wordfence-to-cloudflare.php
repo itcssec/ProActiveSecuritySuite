@@ -3,7 +3,7 @@
 /*
 Plugin Name: Blocked IPs for Wordfence to Cloudflare
 Description: This plugin takes blocked IPs from Wordfence and adds them to the Cloudflare firewall blocked list.
-Version: 1.5.1
+Version: 1.5.2
 Author: ITCS
 Author URI: https://itcs.services/
 License: GPLv2 or later

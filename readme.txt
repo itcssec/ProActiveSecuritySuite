@@ -4,98 +4,204 @@ Tags: Wordfence, Cloudflare, Security, Wordpress Security, Firewall
 Requires at least: 5.2
 Requires PHP: 7.4
 Tested up to: 6.7
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-This plugin takes blocked IPs from Wordfence and adds them to the Cloudflare firewall blocked list.
+# Wordfence to Cloudflare
+Enhance your WordPress website's security by seamlessly integrating Wordfence with Cloudflare. The Wordfence to Cloudflare plugin automatically synchronizes blocked IPs from Wordfence to Cloudflare's firewall, providing an additional layer of protection against malicious traffic.
 
-== Description ==
+Table of Contents
+• Free Features
+• Premium Features
+• Benefits
+• Installation
+• Usage
+• Frequently Asked Questions
 
-This plugin enhances the security of your WordPress website by seamlessly integrating Wordfence and Cloudflare. It automatically synchronizes blocked IPs from Wordfence and adds them to the Cloudflare firewall blocked list, providing an additional layer of protection against malicious traffic.
+# Features
+Free Features:
 
-Features:
+Automatic IP Synchronization
 
-Automatic IP Synchronization: The plugin periodically checks for new blocked IPs in Wordfence and automatically adds them to Cloudflare's blocked IP list. This ensures that known malicious IPs are effectively blocked at the Cloudflare level, reducing the burden on your server.
+Periodically checks for new blocked IPs in Wordfence and automatically adds them to Cloudflare's blocked IP list. This ensures that known malicious IPs are effectively blocked at the Cloudflare level, reducing the burden on your server.
 
-Customizable Settings: The plugin allows you to configure various settings, including Cloudflare credentials (email and zone ID), blocked hits threshold, block scope (domain specific or entire account), and cron interval. These settings can be adjusted according to your specific security requirements.
+# Customizable Settings
 
-Manual Process Trigger: You can manually trigger the synchronization process with a single click, giving you control over when the synchronization occurs. This can be helpful in urgent situations or when you want to ensure immediate synchronization of blocked IPs.
+Cloudflare Credentials: Securely store and manage your Cloudflare Email, API Key, Zone ID, and Account ID.
 
-The Wordfence to Cloudflare plugin now includes an optional integration with AbuseIPDB's API. This enhances the overall functionality and gives users the ability to obtain additional information about the blocked IPs. With this new feature, users can gather comprehensive details about the origin and credibility of the malicious traffic, contributing to a more in-depth understanding of security threats.
+Blocked Hits Threshold: Set a threshold for blocked hits to determine which IPs should be synchronized.
 
-AbuseIPDB Integration: The plugin can now optionally connect to AbuseIPDB's API. Once enabled, this feature allows you to fetch and display additional details about the IPs blocked by Wordfence. This additional information includes country code, usage type, ISP, and a confidence score, further enhancing the transparency and control over your website's security.
+Block Scope: Choose between domain-specific or account-wide blocking on Cloudflare.
+Block Mode: Select the action to be taken on Cloudflare (e.g., Block, Managed Challenge).
 
-Country Code: Identify the geographic origin of the blocked IP addresses. This feature can help understand if your site is being targeted from specific regions.
+Cron Interval: Configure how frequently the plugin synchronizes blocked IPs (e.g., every 5 minutes, hourly).
 
-Usage Type: Get to know the type of entity using the blocked IP. This knowledge can provide insights into the nature of the potential threats.
+Manual Synchronization
 
-ISP Information: Obtain details about the internet service provider of the blocked IP.
+Manually trigger the synchronization process with a single click, ensuring immediate synchronization of blocked IPs when needed.
 
-Confidence Score: AbuseIPDB provides a confidence score that indicates how likely the IP is to engage in abusive behavior. This feature can be useful for prioritizing responses to threats.
+AbuseIPDB Integration (Optional)
 
-Pro Features:
+Enhanced IP Data: Fetch additional details about blocked IPs from AbuseIPDB, including Country Code, Usage Type, ISP, and Confidence Score.
 
-Integration with WhatIsMyBrowser.com API
-This plugin now features seamless integration with the WhatIsMyBrowser.com API, providing you with enhanced user agent analysis and detection capabilities. The WhatIsMyBrowser.com API allows you to obtain detailed information about user agents, including software, operating systems, and more. This integration empowers you to better understand and manage the traffic hitting your WordPress site.
+Country Code: Identify the geographic origin of blocked IPs.
 
-Benefits:
-Advanced User Agent Analysis: With the WhatIsMyBrowser.com API, you can gain deeper insights into the user agents accessing your website. This includes information about the software, operating systems, and more.
+Usage Type: Understand the nature of the entity using the IP (e.g., ISP, Commercial, Residential).
 
-Abusive User Detection: The plugin can now detect potentially abusive or malicious user agents based on the API's analysis. It flags user agents that may pose a security risk, helping you proactively secure your website.
+ISP Information: Obtain details about the Internet Service Provider of the blocked IP.
 
-Automated Blocking: You can automatically block or manage potentially abusive user agents, safeguarding your website from potential threats. The user can send the ips that wishes to block to Cloudflare by clicking the button on each record.  
+Confidence Score: Gauge how likely an IP is to be engaged in abusive behavior.
 
-How to Use:
-Obtain an API Key: To utilize this feature, you need an API key from WhatIsMyBrowser.com. You can obtain an API key by signing up for a free or premium account on their platform.
+Premium Features:
 
-API Key Integration: Once you have your API key, enter it into the plugin settings. This will enable the plugin to communicate with the WhatIsMyBrowser.com API.
+Captured Traffic Data
 
-Enhanced User Agent Analysis: Upon activation, the plugin will start analyzing user agents hitting your site. The information gathered through the API integration will be displayed in the captured traffic data section of the plugin.
+Traffic Logging: Capture and log traffic data, including IP addresses, user agents, request methods, and accessed URLs.
 
-Abusive User Detection: The plugin will automatically mark user agents that are identified as potentially abusive by the API. This enables you to take appropriate actions to protect your site.
+User Agent Analysis: Analyze user agents to detect potentially abusive or malicious clients.
 
-Please note that an API key is required for this feature to function effectively. Whether you choose a free or premium account on WhatIsMyBrowser.com, this integration will help you elevate your website's security and user agent analysis capabilities.
+Exclude User Roles: Option to exclude specific WordPress user roles from traffic logging.
 
-To get started, simply sign up for an account on WhatIsMyBrowser.com, obtain your API key, and integrate it into the plugin settings.
+WhatIsMyBrowser.com API Integration
 
-Security Benefits:
+Advanced User Agent Analysis: Obtain detailed information about user agents accessing your website, including software, operating systems, and more.
 
-Enhanced IP Blocking: By combining the powerful IP blocking capabilities of Wordfence and Cloudflare, this plugin strengthens your website's defense against malicious traffic. It ensures that blocked IPs identified by Wordfence are effectively blocked at the Cloudflare level, preventing them from reaching your server.
+Abusive User Detection: Automatically detect and flag potentially abusive or malicious user agents based on API analysis.
 
-Secure Cloudflare Key Storage: The plugin securely stores your Cloudflare key using WordPress's built-in options table. The key is encrypted and can only be accessed by authorized processes, providing an additional layer of protection for your key.
+Automated Blocking: Option to send IPs associated with abusive user agents to Cloudflare directly from the Captured Traffic interface.
 
-Reduced Server Load: Offloading the blocking of malicious IPs to Cloudflare reduces the load on your server, improving its performance and responsiveness. This is particularly beneficial during DDoS attacks or when dealing with a large number of blocked IPs.
+Enhanced AbuseIPDB Integration
 
-Customizable Security Settings: The plugin offers flexible settings that allow you to tailor the security measures to your specific needs. You can adjust the blocked hits threshold and choose between domain-specific or account-wide blocking, providing granular control over the IP blocking process.
+Automatic Data Update: When AbuseIPDB data is fetched for an IP address, all existing entries with that IP in the Captured Traffic table are updated to reflect the latest data.
 
-Seamless Integration: The plugin seamlessly integrates with your existing Wordfence and Cloudflare configurations. It leverages the APIs provided by both services, ensuring smooth and reliable synchronization of blocked IPs without any manual intervention.
+Priority Support
 
-By utilizing the combined power of Wordfence and Cloudflare, this plugin helps safeguard your WordPress website from malicious IPs more effectively. It automates the synchronization process, reduces server load, and provides customizable security settings, all while ensuring the secure storage of your Cloudflare key. With Wordfence to Cloudflare, you can enhance the security posture of your website and protect it from a wide range of security threats.
+Access to priority support for assistance with plugin setup and troubleshooting.
 
+# Benefits
 
-== Installation: ==
+Enhanced Security
 
-Upload the wordfence-to-cloudflare directory to your /wp-content/plugins/ directory, or install the plugin through the WordPress plugins screen directly.
+Combines the powerful IP blocking capabilities of Wordfence and Cloudflare to provide robust protection against malicious traffic.
+
+Reduced Server Load
+
+Offloads IP blocking to Cloudflare, reducing the burden on your server and improving performance.
+
+Comprehensive Traffic Analysis
+
+Gain deeper insights into the traffic hitting your website, identify potential threats, and take proactive measures.
+
+Customizable Protection
+
+Tailor security measures to your specific needs with flexible settings and options.
+
+Secure Credential Storage
+
+Cloudflare API keys and other sensitive data are securely stored using WordPress's built-in options API.
+
+# Installation
+
+Upload Plugin
+
+Upload the wordfence-to-cloudflare directory to the /wp-content/plugins/ directory.
+
+Alternatively, install the plugin through the WordPress Plugins screen directly.
+
+Activate Plugin
+
 Activate the plugin through the 'Plugins' screen in WordPress.
-Use the Settings -> Wordfence to Cloudflare screen to configure the plugin.
 
-== Frequently Asked Questions: ==
+Configure Settings
 
-Can I manually trigger the IP synchronization process?
-Yes, the plugin provides a button to manually trigger the synchronization process. This can be helpful in urgent situations or when you want to ensure immediate synchronization of blocked IPs.
+Navigate to Settings > WTC Settings in your WordPress dashboard.
 
-Where is my Cloudflare key stored?
-Your Cloudflare key is securely stored in the WordPress's built-in options table. It is encrypted and can only be accessed by authorized processes.
+Enter your Cloudflare credentials and configure the desired settings.
 
-Can I customize the security settings of the plugin?
-Yes, the plugin offers flexible settings that allow you to adjust the blocked hits threshold, choose between domain-specific or account-wide blocking, set the cron interval, and enter your Cloudflare credentials.
+Usage
 
-How does the plugin reduce the server load?
-By offloading the task of blocking malicious IPs to Cloudflare, the plugin reduces the load on your server. This can improve its performance and responsiveness, particularly during DDoS attacks or when dealing with a large number of blocked IPs.
+Cloudflare Credentials
 
-What are the requirements to use this plugin?
-This plugin requires an active Wordfence and Cloudflare account. You also need to have access to your Cloudflare API key and Zone ID to configure the plugin.
+Email: Your Cloudflare account email address.
+
+API Key: Your Cloudflare API key (Global API Key or API Token with appropriate permissions).
+
+Zone ID: The Zone ID of the domain you wish to protect.
+
+Account ID: Your Cloudflare Account ID.
+
+Configure Plugin Settings
+
+Blocked Hits Threshold: Set the minimum number of blocked hits before an IP is synchronized to Cloudflare.
+
+Block Scope: Choose 'Domain Specific' or 'Entire Account' for the scope of the block.
+
+Block Mode: Select the action to be taken (e.g., 'Block', 'Managed Challenge').
+
+Cron Interval: Set how frequently the synchronization should occur.
+
+AbuseIPDB Integration (Optional)
+
+API Key: Obtain an API key from AbuseIPDB and enter it in the plugin settings.
+
+Enable Lookup: Check the option to enable AbuseIPDB lookups.
+
+WhatIsMyBrowser.com Integration (Premium)
+
+API Key: Obtain an API key from WhatIsMyBrowser.com and enter it in the plugin settings.
+
+Enable Integration: Ensure the feature is enabled in the settings.
+
+Captured Traffic Data (Premium)
+
+Enable Traffic Capture: Enable traffic logging in the plugin settings.
+
+Exclude Roles: Select user roles to exclude from traffic logging.
+
+View Captured Data: Navigate to the 'Captured Traffic Data' tab to view and manage logged traffic.
+
+Manual Synchronization
+
+Click the 'Run Process' button in the plugin settings to manually trigger synchronization.
+
+Frequently Asked Questions
+Q1: Can I manually trigger the IP synchronization process?
+
+A: Yes, the plugin provides a 'Run Process' button in the settings. This allows you to manually trigger the synchronization process at any time.
+
+Q2: How is my Cloudflare API key stored?
+
+A: Your Cloudflare API key is securely stored in the WordPress options table using appropriate security measures. It is not displayed in plain text once saved.
+
+Q3: Can I customize which IPs are synchronized to Cloudflare?
+
+A: Yes, you can set a 'Blocked Hits Threshold' to determine which IPs should be synchronized based on the number of blocked hits.
+
+Q4: What are the requirements to use this plugin?
+
+A: You need an active account with Cloudflare and to have the Wordfence plugin installed and activated on your site. For optional features, you may need API keys from AbuseIPDB and WhatIsMyBrowser.com.
+
+Q5: How does the plugin reduce server load?
+
+A: By blocking malicious IPs at the Cloudflare level, the plugin prevents unwanted traffic from reaching your server, thereby reducing load and improving performance.
+
+Q6: Is the Captured Traffic Data feature available in the free version?
+
+A: No, the Captured Traffic Data feature is available in the premium version of the plugin.
+
+Q7: How do I obtain API keys for AbuseIPDB and WhatIsMyBrowser.com?
+
+A: Visit AbuseIPDB and WhatIsMyBrowser.com to sign up for accounts and obtain API keys.
+
+Q8: Can I exclude certain users from being logged in Captured Traffic Data?
+
+A: Yes, in the premium version, you can exclude specific WordPress user roles from being logged.
+
+Q9: Does the plugin support IPv6 addresses?
+
+A: Yes, the plugin supports both IPv4 and IPv6 addresses.
+
 
 == Screenshots ==
 
@@ -103,21 +209,52 @@ This plugin requires an active Wordfence and Cloudflare account. You also need t
 
 == Upgrade Notice ==
 
-= 1.5.1 =
+= 1.5.2 =
 
-Bulk Selection and Deletion in Blocked IPs Tab:
+New Features:
 
-Added a "Select All" checkbox in the Blocked IPs table header, allowing you to select all records across all pages, regardless of how many are displayed per page.
-Implemented the ability to perform bulk actions, such as deleting multiple blocked IPs at once, enhancing efficiency in managing large numbers of records.
-Improved the positioning and styling of the "Select All" checkbox to prevent overlap with sorting arrows, ensuring better usability.
-Enhanced Actions in Captured Traffic Tab:
+Exclude User Roles from Captured Traffic Data (Premium Feature)
 
-Introduced a new "Delete All Records" button within the "Actions" column of the Captured Traffic table. This feature enables you to delete all records associated with a specific IP address with a single click.
-Adjusted the layout and styling of action buttons to prevent them from overflowing outside of their table columns. Buttons are now stacked vertically and styled consistently for a cleaner and more organized look.
-User Interface Improvements:
+Description: Administrators can now select one or more WordPress user roles to exclude from traffic logging in the Captured Traffic Data. This feature enhances privacy and control by preventing the logging of traffic data for trusted users or specific roles, such as administrators or editors.
+How to Use: Navigate to the plugin's settings page under the "Exclude Roles from Captured Traffic" section (available for premium users). Select the roles you wish to exclude from logging and save the settings.
+Improvements:
 
-Modified CSS and table configurations to ensure that all buttons and content fit neatly within their respective columns, enhancing the overall aesthetics and usability of the plugin interface.
-Disabled sorting on checkbox columns and adjusted column widths to optimize the display of data and controls within the tables.
+AbuseIPDB Data Display Enhancement
+
+Resolved an issue where AbuseIPDB data (Country Code, Usage Type, ISP, Confidence Score) was not displayed on every row for IP addresses appearing multiple times in the Captured Traffic table.
+Now, when AbuseIPDB data is fetched for an IP address, all existing entries with that IP in the Captured Traffic table are updated to reflect the latest data.
+Code Compliance and Optimization
+
+Ensured all new code follows WordPress coding standards and best practices.
+Implemented proper sanitization, validation, and use of WordPress APIs for enhanced security and performance.
+Important Notes:
+
+Premium Access Required: The new feature to exclude user roles from traffic logging is available only in the premium version of the plugin. Free users will see a notice indicating that the feature is available upon upgrading.
+
+Action Required: After upgrading to version 1.5.2, premium users should review the new settings:
+
+Go to the plugin settings page.
+Under the "Exclude Roles from Captured Traffic" section, select the user roles you wish to exclude.
+Save the settings to apply the changes.
+No Impact on Existing Settings: Existing configurations and data are not affected by this update. However, reviewing the new settings is recommended to take full advantage of the new features.
+
+Compatibility: This update is fully compatible with WordPress versions up to the latest release as of [Current Date].
+
+Upgrade Instructions:
+
+Backup Your Site: It's always good practice to back up your WordPress site before performing any updates.
+
+Update the Plugin:
+
+Navigate to your WordPress dashboard.
+Go to Plugins > Installed Plugins.
+Find "Wordfence to Cloudflare" in the list.
+Click on "Update Now" to upgrade to version 1.5.2.
+Review New Settings (Premium Users):
+
+After the update, go to Settings > WTC Settings.
+Navigate to the "Exclude Roles from Captured Traffic" section.
+Select the roles to exclude and save your settings.
 
 
 
@@ -204,3 +341,50 @@ User Interface Improvements:
 
 Modified CSS and table configurations to ensure that all buttons and content fit neatly within their respective columns, enhancing the overall aesthetics and usability of the plugin interface.
 Disabled sorting on checkbox columns and adjusted column widths to optimize the display of data and controls within the tables.
+
+= 1.5.2 =
+
+New Features:
+
+Exclude User Roles from Captured Traffic Data (Premium Feature)
+
+Description: Administrators can now select one or more WordPress user roles to exclude from traffic logging in the Captured Traffic Data. This feature enhances privacy and control by preventing the logging of traffic data for trusted users or specific roles, such as administrators or editors.
+How to Use: Navigate to the plugin's settings page under the "Exclude Roles from Captured Traffic" section (available for premium users). Select the roles you wish to exclude from logging and save the settings.
+Improvements:
+
+AbuseIPDB Data Display Enhancement
+
+Resolved an issue where AbuseIPDB data (Country Code, Usage Type, ISP, Confidence Score) was not displayed on every row for IP addresses appearing multiple times in the Captured Traffic table.
+Now, when AbuseIPDB data is fetched for an IP address, all existing entries with that IP in the Captured Traffic table are updated to reflect the latest data.
+Code Compliance and Optimization
+
+Ensured all new code follows WordPress coding standards and best practices.
+Implemented proper sanitization, validation, and use of WordPress APIs for enhanced security and performance.
+Important Notes:
+
+Premium Access Required: The new feature to exclude user roles from traffic logging is available only in the premium version of the plugin. Free users will see a notice indicating that the feature is available upon upgrading.
+
+Action Required: After upgrading to version 1.5.2, premium users should review the new settings:
+
+Go to the plugin settings page.
+Under the "Exclude Roles from Captured Traffic" section, select the user roles you wish to exclude.
+Save the settings to apply the changes.
+No Impact on Existing Settings: Existing configurations and data are not affected by this update. However, reviewing the new settings is recommended to take full advantage of the new features.
+
+Compatibility: This update is fully compatible with WordPress versions up to the latest release as of [Current Date].
+
+Upgrade Instructions:
+
+Backup Your Site: It's always good practice to back up your WordPress site before performing any updates.
+
+Update the Plugin:
+
+Navigate to your WordPress dashboard.
+Go to Plugins > Installed Plugins.
+Find "Wordfence to Cloudflare" in the list.
+Click on "Update Now" to upgrade to version 1.5.2.
+Review New Settings (Premium Users):
+
+After the update, go to Settings > WTC Settings.
+Navigate to the "Exclude Roles from Captured Traffic" section.
+Select the roles to exclude and save your settings.

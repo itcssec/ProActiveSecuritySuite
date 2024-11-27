@@ -111,7 +111,7 @@ function wtc_render_settings_tab() {
         if ( !empty( $abuseipdb_api_id_input ) && $abuseipdb_api_id_input !== str_repeat( '*', 10 ) ) {
             update_option( 'abuseipdb_api_id', $abuseipdb_api_id_input );
         }
-        // Enable AbuseIPDB Lookup Option
+        // Enable AbuseIPDB Lookup Option.
         $wtc_enable_abuseipdb = ( isset( $_POST['wtc_enable_abuseipdb'] ) ? 'yes' : 'no' );
         update_option( 'wtc_enable_abuseipdb', $wtc_enable_abuseipdb );
         update_option( 'blocked_hits_threshold', $blocked_hits_threshold );
@@ -141,10 +141,16 @@ function wtc_render_settings_tab() {
     $cron_interval = get_option( 'cron_interval', 'hourly' );
     $wtc_last_processed_time = get_option( 'wtc_last_processed_time', '' );
     $wtc_processed_ips_count = get_option( 'wtc_processed_ips_count', 0 );
-    // Get the traffic capture setting
+    // Get the traffic capture setting.
     $wtc_enable_traffic_capture = get_option( 'wtc_enable_traffic_capture', 'yes' );
-    // Get the AbuseIPDB enable setting
+    // Get the AbuseIPDB enable setting.
     $wtc_enable_abuseipdb = get_option( 'wtc_enable_abuseipdb', 'no' );
+    // Get the AbuseIPDB lookup for captured traffic setting.
+    $wtc_enable_abuseipdb_lookup_traffic = get_option( 'wtc_enable_abuseipdb_lookup_traffic', 'no' );
+    // Get the saved excluded roles.
+    $wtc_excluded_roles = get_option( 'wtc_excluded_roles', array() );
+    // Retrieve all editable roles.
+    $editable_roles = get_editable_roles();
     settings_errors( 'wtc_settings' );
     ?>
     <div class="wrap">
@@ -230,6 +236,41 @@ function wtc_render_settings_tab() {
     ?></th>
                         <td>
                             <input type="password" disabled value="" />
+                            <p class="description"><?php 
+    esc_html_e( 'Available in the premium version.', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></p>
+                        </td>
+                    </tr>
+                    <!-- Enable Traffic Capture (Disabled) -->
+                    <tr valign="top">
+                        <th scope="row"><?php 
+    esc_html_e( 'Enable Traffic Capture', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></th>
+                        <td>
+                            <input type="checkbox" disabled />
+                            <p class="description"><?php 
+    esc_html_e( 'Available in the premium version.', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></p>
+                        </td>
+                    </tr>
+                    <!-- Enable AbuseIPDB Lookup for Captured Traffic (Disabled) -->
+                    <tr valign="top">
+                        <th scope="row"><?php 
+    esc_html_e( 'Enable AbuseIPDB Lookup for Captured Traffic', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></th>
+                        <td>
+                            <input type="checkbox" disabled />
+                            <p class="description"><?php 
+    esc_html_e( 'Available in the premium version.', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></p>
+                        </td>
+                    </tr>
+                    <!-- Exclude Roles from Captured Traffic (Disabled) -->
+                    <tr valign="top">
+                        <th scope="row"><?php 
+    esc_html_e( 'Exclude Roles from Captured Traffic', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></th>
+                        <td>
                             <p class="description"><?php 
     esc_html_e( 'Available in the premium version.', 'blocked-ips-for-wordfence-to-cloudflare' );
     ?></p>
@@ -325,23 +366,6 @@ function wtc_render_settings_tab() {
                         </select>
                     </td>
                 </tr>
-
-                <!-- Enable Traffic Capture -->
-                <?php 
-    ?>
-                    <tr valign="top">
-                        <th scope="row"><?php 
-    esc_html_e( 'Enable Traffic Capture', 'blocked-ips-for-wordfence-to-cloudflare' );
-    ?></th>
-                        <td>
-                            <input type="checkbox" disabled />
-                            <p class="description"><?php 
-    esc_html_e( 'Available in the premium version.', 'blocked-ips-for-wordfence-to-cloudflare' );
-    ?></p>
-                        </td>
-                    </tr>
-                <?php 
-    ?>
             </table>
 
             <!-- Cron Status -->
@@ -441,13 +465,17 @@ function wtc_run_process_manually() {
 }
 
 add_action( 'admin_post_wtc_run_process', 'wtc_run_process_manually' );
-// Add CSS for disabled tabs
+// Add CSS for disabled tabs and inputs.
 function wtc_admin_styles() {
     echo '<style>
     .nav-tab.disabled {
         color: #a7aaad;
         pointer-events: none;
         cursor: default;
+    }
+    input[disabled], select[disabled], textarea[disabled] {
+        background-color: #f1f1f1;
+        color: #a7aaad;
     }
     </style>';
 }
