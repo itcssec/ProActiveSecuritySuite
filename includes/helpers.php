@@ -8,11 +8,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 function wtc_check_custom_tables() {
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'wtc_blocked_ips';
+    $blocked_ips_table = $wpdb->prefix . 'wtc_blocked_ips';
 
     $charset_collate = $wpdb->get_charset_collate();
 
-    $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+    // Corrected Create Table Statement
+    $sql_blocked_ips = "CREATE TABLE {$blocked_ips_table} (
         id mediumint(9) NOT NULL AUTO_INCREMENT,
         blockedTime datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
         blockedHits int(11) DEFAULT 0 NOT NULL,
@@ -23,12 +24,18 @@ function wtc_check_custom_tables() {
         usageType varchar(100) DEFAULT '' NOT NULL,
         isp varchar(255) DEFAULT '' NOT NULL,
         confidenceScore varchar(10) DEFAULT '' NOT NULL,
+        block_mode varchar(50) DEFAULT 'block' NOT NULL,
+        rule_id mediumint(9) DEFAULT NULL,
+        rule_details text DEFAULT NULL,
         PRIMARY KEY  (id)
-    ) $charset_collate;";
+    ) {$charset_collate};";
 
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-    dbDelta( $sql );
+    dbDelta( $sql_blocked_ips );
 }
+add_action( 'init', 'wtc_check_custom_tables' );
+
+
 
 // Function to update the cron schedule.
 function wtc_update_cron_schedule() {

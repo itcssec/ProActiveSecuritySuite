@@ -52,6 +52,8 @@ function wtc_fetch_and_store_blocked_ips() {
                 $date->setTimezone( new DateTimeZone( $timezone ) );
                 $blocked_time = $date->format( 'Y-m-d H:i:s' );
 
+                $block_mode = get_option( 'block_mode', 'block' );
+
                 $wpdb->insert(
                     $table_name,
                     array(
@@ -64,8 +66,9 @@ function wtc_fetch_and_store_blocked_ips() {
                         'usageType'       => '',
                         'isp'             => '',
                         'confidenceScore' => '',
+                        'block_mode'      => $block_mode,
                     ),
-                    array( '%s', '%d', '%s', '%s', '%d', '%s', '%s', '%s', '%s' )
+                    array( '%s', '%d', '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s' )
                 );
             }
         }
@@ -96,6 +99,7 @@ function wtc_add_ips_to_cloudflare() {
     if ( $ips_to_send ) {
         foreach ( $ips_to_send as $ip ) {
             $ip_address = $ip->ip;
+            $block_mode = $ip->block_mode;
 
             // Perform AbuseIPDB lookup if enabled
             if ( $wtc_enable_abuseipdb == 'yes' && ! empty( $abuseipdb_api_key ) ) {
@@ -160,7 +164,7 @@ function wtc_add_ips_to_cloudflare() {
                     'Content-Type' => 'application/json',
                 ),
                 'body'    => wp_json_encode( array(
-                    'mode'          => $block_mode,
+                    'mode'          => $block_mode, // Use the block_mode from the IP
                     'configuration' => array(
                         'target' => 'ip',
                         'value'  => $ip_address,
@@ -255,22 +259,24 @@ function wtc_render_ips_tab() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'wtc_blocked_ips';
 
+    // Fetch all blocked IPs
     $ips = $wpdb->get_results( "SELECT * FROM $table_name" );
 
     // Get the total number of rows
     $totalRows = count( $ips );
 
-    // Render the table HTML.
+    // Since DataTables scripts are enqueued and initialized globally,
+    // we do not need to enqueue scripts or initialize the table again here.
+
     ?>
     <h2><?php esc_html_e( 'Blocked IPs', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></h2>
 
     <style>
-    /* Add custom styles for the checkbox column */
+    /* Custom styles for the checkbox column */
     .wtc-checkbox-column {
         width: 50px;
         text-align: center;
     }
-    /* Center the checkbox within the header */
     .wtc-checkbox-column-header {
         display: flex;
         justify-content: center;
@@ -284,12 +290,13 @@ function wtc_render_ips_tab() {
             <tr>
                 <th><?php esc_html_e( 'ID', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
                 <th><?php esc_html_e( 'Blocked Time', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
-                <th><?php esc_html_e( 'Blocked Hits', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
                 <th><?php esc_html_e( 'IP', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
+                <th><?php esc_html_e( 'Rule Details', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
                 <th><?php esc_html_e( 'Country Code', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
                 <th><?php esc_html_e( 'Usage Type', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
                 <th><?php esc_html_e( 'ISP', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
                 <th><?php esc_html_e( 'Confidence Score', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
+                <th><?php esc_html_e( 'Block Mode', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
                 <th><?php esc_html_e( 'CF Response', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
                 <th><?php esc_html_e( 'Is Sent', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
                 <th class="wtc-checkbox-column">
@@ -304,12 +311,32 @@ function wtc_render_ips_tab() {
                 <tr>
                     <td><?php echo esc_html( $ip->id ); ?></td>
                     <td><?php echo esc_html( $ip->blockedTime ); ?></td>
-                    <td><?php echo esc_html( $ip->blockedHits ); ?></td>
                     <td><?php echo esc_html( $ip->ip ); ?></td>
+                    <td>
+                        <?php
+                        // Display the rule details if available
+                        if ( ! empty( $ip->rule_details ) ) {
+                            $rule_details = json_decode( $ip->rule_details, true );
+                            if ( $rule_details ) {
+                                foreach ( $rule_details['criteria'] as $key => $value ) {
+                                    if ( is_array( $value ) ) {
+                                        echo esc_html( ucfirst( str_replace( '_', ' ', $key ) ) . ': ' . $value['operator'] . ' ' . $value['value'] ) . '<br>';
+                                    } else {
+                                        echo esc_html( ucfirst( str_replace( '_', ' ', $key ) ) . ': ' . $value ) . '<br>';
+                                    }
+                                }
+                                echo '<strong>' . esc_html__( 'Action:', 'blocked-ips-for-wordfence-to-cloudflare' ) . '</strong> ' . esc_html( ucfirst( str_replace( '_', ' ', $rule_details['action'] ) ) );
+                            }
+                        } else {
+                            echo esc_html__( 'N/A', 'blocked-ips-for-wordfence-to-cloudflare' );
+                        }
+                        ?>
+                    </td>
                     <td><?php echo esc_html( $ip->countryCode ); ?></td>
                     <td><?php echo esc_html( $ip->usageType ); ?></td>
                     <td><?php echo esc_html( $ip->isp ); ?></td>
                     <td><?php echo esc_html( $ip->confidenceScore ); ?></td>
+                    <td><?php echo esc_html( ucfirst( str_replace( '_', ' ', $ip->block_mode ) ) ); ?></td>
                     <td><?php echo esc_html( $ip->cfResponse ); ?></td>
                     <td><?php echo esc_html( $ip->isSent ); ?></td>
                     <td class="wtc-checkbox-column">
@@ -323,8 +350,6 @@ function wtc_render_ips_tab() {
     <button id="wtc-delete-selected" class="button button-primary"><?php esc_html_e( 'Delete Selected', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></button>
     <button id="wtc-delete-selected-cloudflare" class="button button-primary"><?php esc_html_e( 'Delete Selected (Cloudflare)', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></button>
 
-    <script type="text/javascript">
-        var totalRows = <?php echo $totalRows; ?>;
-    </script>
     <?php
 }
+

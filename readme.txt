@@ -4,7 +4,7 @@ Tags: Wordfence, Cloudflare, Security, Wordpress Security, Firewall
 Requires at least: 5.2
 Requires PHP: 7.4
 Tested up to: 6.7
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -209,53 +209,23 @@ A: Yes, the plugin supports both IPv4 and IPv6 addresses.
 
 == Upgrade Notice ==
 
-= 1.5.2 =
+= 1.5.3 =
 
-New Features:
+Added
+Advanced Rule Builder and Evaluation System: Introduced a powerful rule evaluation engine that allows you to create custom security rules based on various criteria such as confidence score, whitelisted status, abusive status, and more. This enables automated decision-making and actions based on incoming traffic data.
 
-Exclude User Roles from Captured Traffic Data (Premium Feature)
+Rule Priorities: Implemented a priority system for rules, allowing you to control the order in which rules are evaluated. Higher priority numbers are evaluated first, ensuring critical rules are applied before others.
 
-Description: Administrators can now select one or more WordPress user roles to exclude from traffic logging in the Captured Traffic Data. This feature enhances privacy and control by preventing the logging of traffic data for trusted users or specific roles, such as administrators or editors.
-How to Use: Navigate to the plugin's settings page under the "Exclude Roles from Captured Traffic" section (available for premium users). Select the roles you wish to exclude from logging and save the settings.
-Improvements:
+Automatic Action Application: The plugin now automatically applies actions (e.g., block, challenge) to IP addresses that match your defined rules immediately after capturing traffic data.
 
-AbuseIPDB Data Display Enhancement
+Rule Details in Blocked IPs Table: Enhanced the Blocked IPs tab by adding a new column that displays detailed information about the rules that caused each IP address to be blocked, including criteria and actions taken.
 
-Resolved an issue where AbuseIPDB data (Country Code, Usage Type, ISP, Confidence Score) was not displayed on every row for IP addresses appearing multiple times in the Captured Traffic table.
-Now, when AbuseIPDB data is fetched for an IP address, all existing entries with that IP in the Captured Traffic table are updated to reflect the latest data.
-Code Compliance and Optimization
+Fixed
+Database Schema Updates: Resolved issues with missing database columns (block_mode, rule_id, rule_details) by enhancing the table creation and update process. The plugin now correctly updates existing tables to include new columns without errors.
 
-Ensured all new code follows WordPress coding standards and best practices.
-Implemented proper sanitization, validation, and use of WordPress APIs for enhanced security and performance.
-Important Notes:
+DataTables Initialization Issue: Fixed an issue where the DataTables plugin was being initialized multiple times, causing reinitialization errors. The plugin now ensures that DataTables are initialized correctly without conflicts.
 
-Premium Access Required: The new feature to exclude user roles from traffic logging is available only in the premium version of the plugin. Free users will see a notice indicating that the feature is available upon upgrading.
-
-Action Required: After upgrading to version 1.5.2, premium users should review the new settings:
-
-Go to the plugin settings page.
-Under the "Exclude Roles from Captured Traffic" section, select the user roles you wish to exclude.
-Save the settings to apply the changes.
-No Impact on Existing Settings: Existing configurations and data are not affected by this update. However, reviewing the new settings is recommended to take full advantage of the new features.
-
-Compatibility: This update is fully compatible with WordPress versions up to the latest release as of [Current Date].
-
-Upgrade Instructions:
-
-Backup Your Site: It's always good practice to back up your WordPress site before performing any updates.
-
-Update the Plugin:
-
-Navigate to your WordPress dashboard.
-Go to Plugins > Installed Plugins.
-Find "Wordfence to Cloudflare" in the list.
-Click on "Update Now" to upgrade to version 1.5.2.
-Review New Settings (Premium Users):
-
-After the update, go to Settings > WTC Settings.
-Navigate to the "Exclude Roles from Captured Traffic" section.
-Select the roles to exclude and save your settings.
-
+Rule Evaluation Bug: Addressed a bug where rules were not being evaluated after capturing traffic data. The plugin now properly calls the rule evaluation function, ensuring that your rules are applied as expected.
 
 
 == Changelog ==
@@ -388,3 +358,22 @@ Review New Settings (Premium Users):
 After the update, go to Settings > WTC Settings.
 Navigate to the "Exclude Roles from Captured Traffic" section.
 Select the roles to exclude and save your settings.
+
+= 1.5.3 =
+
+Added
+Advanced Rule Builder and Evaluation System: Introduced a powerful rule evaluation engine that allows you to create custom security rules based on various criteria such as confidence score, whitelisted status, abusive status, and more. This enables automated decision-making and actions based on incoming traffic data.
+
+Rule Priorities: Implemented a priority system for rules, allowing you to control the order in which rules are evaluated. Higher priority numbers are evaluated first, ensuring critical rules are applied before others.
+
+Automatic Action Application: The plugin now automatically applies actions (e.g., block, challenge) to IP addresses that match your defined rules immediately after capturing traffic data.
+
+Rule Details in Blocked IPs Table: Enhanced the Blocked IPs tab by adding a new column that displays detailed information about the rules that caused each IP address to be blocked, including criteria and actions taken.
+
+Fixed
+Database Schema Updates: Resolved issues with missing database columns (block_mode, rule_id, rule_details) by enhancing the table creation and update process. The plugin now correctly updates existing tables to include new columns without errors.
+
+DataTables Initialization Issue: Fixed an issue where the DataTables plugin was being initialized multiple times, causing reinitialization errors. The plugin now ensures that DataTables are initialized correctly without conflicts.
+
+Rule Evaluation Bug: Addressed a bug where rules were not being evaluated after capturing traffic data. The plugin now properly calls the rule evaluation function, ensuring that your rules are applied as expected.
+

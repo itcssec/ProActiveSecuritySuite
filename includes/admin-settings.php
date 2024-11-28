@@ -57,6 +57,11 @@ function wtc_render_admin_page() {
     ?> <?php 
     esc_html_e( '(Premium)', 'blocked-ips-for-wordfence-to-cloudflare' );
     ?></a>
+                <a href="#" class="nav-tab disabled"><?php 
+    esc_html_e( 'Rule Builder', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?> <?php 
+    esc_html_e( '(Premium)', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></a>
             <?php 
     ?>
         </h2>
@@ -72,6 +77,14 @@ function wtc_render_admin_page() {
             // Add an upgrade button
             if ( function_exists( 'wor_fs' ) ) {
                 wor_fs()->get_logger()->warning( 'Attempted access to premium tab: Captured Traffic Data' );
+                wor_fs()->add_upgrade_button();
+            }
+            break;
+        case 'wtc-rules':
+            echo '<div class="notice notice-warning"><p>' . esc_html__( 'The Rule Builder feature is available in the premium version. Please upgrade to access this feature.', 'blocked-ips-for-wordfence-to-cloudflare' ) . '</p></div>';
+            // Add an upgrade button
+            if ( function_exists( 'wor_fs' ) ) {
+                wor_fs()->get_logger()->warning( 'Attempted access to premium tab: Rule Builder' );
                 wor_fs()->add_upgrade_button();
             }
             break;
@@ -327,6 +340,7 @@ function wtc_render_settings_tab() {
     ?>><?php 
     esc_html_e( 'Managed Challenge', 'blocked-ips-for-wordfence-to-cloudflare' );
     ?></option>
+                            <!-- Add other modes as needed -->
                         </select>
                     </td>
                 </tr>
@@ -481,3 +495,267 @@ function wtc_admin_styles() {
 }
 
 add_action( 'admin_head', 'wtc_admin_styles' );
+// Render the Rule Builder tab.
+function wtc_render_rule_builder_tab() {
+    if ( !current_user_can( 'manage_options' ) ) {
+        wp_die( 'Access is not allowed.' );
+    }
+    // Handle form submission for adding a new rule.
+    if ( isset( $_POST['wtc_add_rule_nonce'] ) && check_admin_referer( 'wtc_add_rule_action', 'wtc_add_rule_nonce' ) ) {
+        // Validate and sanitize inputs
+        $criteria = array();
+        if ( !empty( $_POST['confidence_score_operator'] ) && isset( $_POST['confidence_score_value'] ) ) {
+            $operator = sanitize_text_field( $_POST['confidence_score_operator'] );
+            $value = intval( $_POST['confidence_score_value'] );
+            $criteria['confidence_score'] = array(
+                'operator' => $operator,
+                'value'    => $value,
+            );
+        }
+        if ( isset( $_POST['is_whitelisted'] ) && $_POST['is_whitelisted'] !== '' ) {
+            $is_whitelisted = sanitize_text_field( $_POST['is_whitelisted'] );
+            $criteria['is_whitelisted'] = $is_whitelisted;
+        }
+        if ( isset( $_POST['is_abusive'] ) && $_POST['is_abusive'] !== '' ) {
+            $is_abusive = sanitize_text_field( $_POST['is_abusive'] );
+            $criteria['is_abusive'] = $is_abusive;
+        }
+        // Add other criteria as needed
+        $action = sanitize_text_field( $_POST['action'] );
+        $priority = intval( $_POST['priority'] );
+        // Insert the rule into the database
+        global $wpdb;
+        $rules_table = $wpdb->prefix . 'wtc_rules';
+        $wpdb->insert( $rules_table, array(
+            'criteria' => wp_json_encode( $criteria ),
+            'action'   => $action,
+            'priority' => $priority,
+        ), array('%s', '%s', '%d') );
+        // Redirect to avoid resubmission
+        wp_redirect( add_query_arg( 'message', 'rule_added', admin_url( 'options-general.php?page=wtc-settings&tab=wtc-rules' ) ) );
+        exit;
+    }
+    // Handle deletion of a rule.
+    if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete_rule' && isset( $_GET['rule_id'] ) && check_admin_referer( 'wtc_delete_rule_nonce', '_wpnonce' ) ) {
+        $rule_id = intval( $_GET['rule_id'] );
+        global $wpdb;
+        $rules_table = $wpdb->prefix . 'wtc_rules';
+        $wpdb->delete( $rules_table, array(
+            'id' => $rule_id,
+        ), array('%d') );
+        // Redirect back to rules page
+        wp_redirect( add_query_arg( 'message', 'rule_deleted', admin_url( 'options-general.php?page=wtc-settings&tab=wtc-rules' ) ) );
+        exit;
+    }
+    // Fetch existing rules.
+    global $wpdb;
+    $rules_table = $wpdb->prefix . 'wtc_rules';
+    $rules = $wpdb->get_results( "SELECT * FROM {$rules_table} ORDER BY priority DESC" );
+    // Display any messages.
+    if ( isset( $_GET['message'] ) ) {
+        if ( $_GET['message'] === 'rule_added' ) {
+            echo '<div class="notice notice-success"><p>' . esc_html__( 'Rule added successfully.', 'blocked-ips-for-wordfence-to-cloudflare' ) . '</p></div>';
+        } elseif ( $_GET['message'] === 'rule_deleted' ) {
+            echo '<div class="notice notice-success"><p>' . esc_html__( 'Rule deleted successfully.', 'blocked-ips-for-wordfence-to-cloudflare' ) . '</p></div>';
+        }
+    }
+    ?>
+    <h2><?php 
+    esc_html_e( 'Rule Builder', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></h2>
+
+    <!-- Disclaimer -->
+    <div class="notice notice-warning">
+        <p><?php 
+    esc_html_e( 'Please use automatic mitigation rules with caution. Misconfigured rules may block legitimate traffic, including known bots. Always ensure that "isWhitelisted" is set to "false" when creating rules based on confidence scores.', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></p>
+    </div>
+
+    <!-- Existing Rules Table -->
+    <table class="wp-list-table widefat fixed striped">
+        <thead>
+            <tr>
+                <th><?php 
+    esc_html_e( 'Priority', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></th>
+                <th><?php 
+    esc_html_e( 'Criteria', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></th>
+                <th><?php 
+    esc_html_e( 'Action', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></th>
+                <th><?php 
+    esc_html_e( 'Manage', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php 
+    if ( !empty( $rules ) ) {
+        ?>
+                <?php 
+        foreach ( $rules as $rule ) {
+            ?>
+                    <?php 
+            $criteria = json_decode( $rule->criteria, true );
+            ?>
+                    <tr>
+                        <td><?php 
+            echo esc_html( $rule->priority );
+            ?></td>
+                        <td>
+                            <?php 
+            // Display criteria in a readable format
+            foreach ( $criteria as $key => $value ) {
+                echo esc_html( ucfirst( str_replace( '_', ' ', $key ) ) ) . ': ';
+                if ( is_array( $value ) ) {
+                    echo esc_html( $value['operator'] . ' ' . $value['value'] );
+                } else {
+                    echo esc_html( $value );
+                }
+                echo '<br>';
+            }
+            ?>
+                        </td>
+                        <td><?php 
+            echo esc_html( ucfirst( str_replace( '_', ' ', $rule->action ) ) );
+            ?></td>
+                        <td>
+                            <!-- Delete Button -->
+                            <a href="<?php 
+            echo esc_url( wp_nonce_url( add_query_arg( array(
+                'action'  => 'delete_rule',
+                'rule_id' => $rule->id,
+            ), admin_url( 'options-general.php?page=wtc-settings&tab=wtc-rules' ) ), 'wtc_delete_rule_nonce' ) );
+            ?>"><?php 
+            esc_html_e( 'Delete', 'blocked-ips-for-wordfence-to-cloudflare' );
+            ?></a>
+                        </td>
+                    </tr>
+                <?php 
+        }
+        ?>
+            <?php 
+    } else {
+        ?>
+                <tr>
+                    <td colspan="4"><?php 
+        esc_html_e( 'No rules defined.', 'blocked-ips-for-wordfence-to-cloudflare' );
+        ?></td>
+                </tr>
+            <?php 
+    }
+    ?>
+        </tbody>
+    </table>
+
+    <!-- Add New Rule Form -->
+    <h3><?php 
+    esc_html_e( 'Add New Rule', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></h3>
+    <form method="post" action="">
+        <?php 
+    wp_nonce_field( 'wtc_add_rule_action', 'wtc_add_rule_nonce' );
+    ?>
+        <table class="form-table">
+            <!-- Confidence Score Criteria -->
+            <tr valign="top">
+                <th scope="row"><?php 
+    esc_html_e( 'Confidence Score', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></th>
+                <td>
+                    <select name="confidence_score_operator">
+                        <option value=">"><?php 
+    esc_html_e( '>', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></option>
+                        <option value=">="><?php 
+    esc_html_e( '>=', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></option>
+                        <option value="<"><?php 
+    esc_html_e( '<', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></option>
+                        <option value="<="><?php 
+    esc_html_e( '<=', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></option>
+                        <option value="="><?php 
+    esc_html_e( '=', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></option>
+                    </select>
+                    <input type="number" name="confidence_score_value" min="0" max="100" />
+                </td>
+            </tr>
+            <!-- isWhitelisted Criteria -->
+            <tr valign="top">
+                <th scope="row"><?php 
+    esc_html_e( 'Is Whitelisted', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></th>
+                <td>
+                    <select name="is_whitelisted">
+                        <option value=""><?php 
+    esc_html_e( 'Any', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></option>
+                        <option value="true"><?php 
+    esc_html_e( 'True', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></option>
+                        <option value="false"><?php 
+    esc_html_e( 'False', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></option>
+                    </select>
+                </td>
+            </tr>
+            <!-- is_abusive Criteria -->
+            <tr valign="top">
+                <th scope="row"><?php 
+    esc_html_e( 'Is Abusive', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></th>
+                <td>
+                    <select name="is_abusive">
+                        <option value=""><?php 
+    esc_html_e( 'Any', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></option>
+                        <option value="true"><?php 
+    esc_html_e( 'True', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></option>
+                        <option value="false"><?php 
+    esc_html_e( 'False', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></option>
+                    </select>
+                </td>
+            </tr>
+            <!-- Action -->
+            <tr valign="top">
+                <th scope="row"><?php 
+    esc_html_e( 'Cloudflare Action', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></th>
+                <td>
+                    <select name="action">
+                        <option value="block"><?php 
+    esc_html_e( 'Block', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></option>
+                        <option value="managed_challenge"><?php 
+    esc_html_e( 'Managed Challenge', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></option>
+                        <!-- Add other actions as needed -->
+                    </select>
+                </td>
+            </tr>
+            <!-- Priority -->
+            <tr valign="top">
+                <th scope="row"><?php 
+    esc_html_e( 'Priority', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></th>
+                <td>
+                    <input type="number" name="priority" min="0" value="0" />
+                    <p class="description"><?php 
+    esc_html_e( 'Higher priority rules are evaluated first.', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></p>
+                </td>
+            </tr>
+        </table>
+
+        <?php 
+    submit_button( __( 'Add Rule', 'blocked-ips-for-wordfence-to-cloudflare' ) );
+    ?>
+    </form>
+    <?php 
+}
