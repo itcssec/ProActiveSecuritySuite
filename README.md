@@ -1,287 +1,199 @@
-<body>
-
-<h1>Welcome to the <em>Wordfence to Cloudflare</em> Plugin Wiki</h1>
-
-<p>
-    Enhance your WordPress website's security by seamlessly integrating <strong>Wordfence</strong> with <strong>Cloudflare</strong>. The <em>Wordfence to Cloudflare</em> plugin automates the synchronization of blocked IPs from Wordfence to Cloudflare's firewall, providing an additional layer of protection against malicious traffic.
-</p>
-
-<div class="toc">
-    <h2>Table of Contents</h2>
-    <ul>
-        <li><a href="#introduction">Introduction</a></li>
-        <li><a href="#features">Features</a></li>
-        <ul>
-            <li><a href="#free-features">Free Features</a></li>
-            <li><a href="#premium-features">Premium Features</a></li>
-        </ul>
-        <li><a href="#installation">Installation</a></li>
-        <li><a href="#configuration">Configuration</a></li>
-        <ul>
-            <li><a href="#cloudflare-settings">Cloudflare Settings</a></li>
-            <li><a href="#wordfence-settings">Wordfence Settings</a></li>
-            <li><a href="#abuseipdb-integration">AbuseIPDB Integration</a></li>
-            <li><a href="#whatismybrowsercom-integration">WhatIsMyBrowser.com Integration</a></li>
-        </ul>
-        <li><a href="#usage">Usage</a></li>
-        <ul>
-            <li><a href="#automatic-ip-synchronization">Automatic IP Synchronization</a></li>
-            <li><a href="#manual-synchronization">Manual Synchronization</a></li>
-            <li><a href="#captured-traffic-data">Captured Traffic Data</a></li>
-            <li><a href="#advanced-rule-builder">Advanced Rule Builder</a></li>
-            <li><a href="#rule-details-in-blocked-ips">Rule Details in Blocked IPs</a></li>
-        </ul>
-        <li><a href="#advanced-settings">Advanced Settings</a></li>
-        <li><a href="#faq">Frequently Asked Questions</a></li>
-        <li><a href="#support">Support and Contribution</a></li>
-        <li><a href="#license">License</a></li>
-    </ul>
-</div>
-
-<h2 id="introduction">Introduction</h2>
-
-<p>
-    Welcome to the <strong>Wordfence to Cloudflare</strong> plugin! This powerful tool enhances your website's security by combining the strengths of Wordfence and Cloudflare. By automatically synchronizing blocked IPs from Wordfence to Cloudflare's firewall, you can stop malicious traffic before it reaches your server, reducing load and enhancing performance.
-</p>
-
-<a href="https://github.com/itcssec/Wordfence2Cloudflare/releases" class="button">Download Latest Release</a>
-
-<h2 id="features">Features</h2>
-
-<h3 id="free-features">Free Features</h3>
-
-<ul>
-    <li><strong>Automatic IP Synchronization:</strong> Effortlessly sync blocked IPs from Wordfence to Cloudflare's firewall.</li>
-    <li><strong>Customizable Settings:</strong> Tailor the plugin to your needs with adjustable settings:
-        <ul>
-            <li>Blocked Hits Threshold</li>
-            <li>Block Scope (Domain or Account)</li>
-            <li>Block Mode (e.g., Block, Managed Challenge)</li>
-            <li>Cron Interval</li>
-        </ul>
-    </li>
-    <li><strong>Manual Synchronization:</strong> Trigger synchronization manually when immediate action is needed.</li>
-    <li><strong>AbuseIPDB Integration:</strong> Optional integration to fetch detailed information about blocked IPs:
-        <ul>
-            <li>Country Code</li>
-            <li>Usage Type</li>
-            <li>ISP Information</li>
-            <li>Confidence Score</li>
-        </ul>
-    </li>
-</ul>
-
-<h3 id="premium-features">Premium Features</h3>
-
-<ul>
-    <li><strong>Advanced Rule Builder:</strong> Create custom security rules based on various criteria such as confidence score, whitelisted status, abusive status, and more. Automate actions like blocking or challenging IPs based on these rules.</li>
-    <li><strong>Rule Priorities:</strong> Assign priorities to your rules to control the order of evaluation. Higher priority numbers are evaluated first, allowing critical rules to take precedence.</li>
-    <li><strong>Automatic Action Application:</strong> The plugin automatically applies actions to IPs that match your defined rules immediately after capturing traffic data.</li>
-    <li><strong>Rule Details in Blocked IPs:</strong> View detailed information about which rules caused IPs to be blocked, including criteria and actions taken.</li>
-    <li><strong>Captured Traffic Data:</strong> Log and analyze incoming traffic for enhanced security insights.</li>
-    <li><strong>Exclude User Roles:</strong> Exclude specific WordPress user roles from traffic logging.</li>
-    <li><strong>WhatIsMyBrowser.com API Integration:</strong> Advanced user agent analysis and detection capabilities.</li>
-    <li><strong>Enhanced AbuseIPDB Integration:</strong> Automatic updates for all entries with the same IP address.</li>
-    <li><strong>Priority Support:</strong> Access dedicated support for assistance and troubleshooting.</li>
-</ul>
-
-<div class="note">
-    <strong>Note:</strong> The premium features require an active premium license. Upgrade to access these advanced functionalities.
-</div>
-
-<h2 id="installation">Installation</h2>
-
-<ol>
-    <li><strong>Download the Plugin:</strong> Clone the repository or <a href="https://github.com/itcssec/Wordfence2Cloudflare/releases">download the latest release</a>.</li>
-    <li><strong>Upload to WordPress:</strong> Upload the <code>wordfence-to-cloudflare</code> directory to <code>/wp-content/plugins/</code>.</li>
-    <li><strong>Activate the Plugin:</strong> In your WordPress dashboard, navigate to <em>Plugins</em> and activate <em>Wordfence to Cloudflare</em>.</li>
-</ol>
-
-<h2 id="configuration">Configuration</h2>
-
-<h3 id="cloudflare-settings">Cloudflare Settings</h3>
+# Wordfence to Cloudflare
+Enhance your WordPress website's security by seamlessly integrating Wordfence with Cloudflare. The Wordfence to Cloudflare plugin automatically synchronizes blocked IPs from Wordfence to Cloudflare's firewall, providing an additional layer of protection against malicious traffic.
 
-<ol>
-    <li><strong>Obtain Cloudflare Credentials:</strong>
-        <ul>
-            <li><strong>Email:</strong> Your Cloudflare account email.</li>
-            <li><strong>API Key:</strong> Your Global API Key or an API Token with necessary permissions.</li>
-            <li><strong>Zone ID:</strong> Found in your Cloudflare dashboard under the domain's overview.</li>
-            <li><strong>Account ID:</strong> Located in your Cloudflare profile settings.</li>
-        </ul>
-    </li>
-    <li><strong>Configure Plugin Settings:</strong>
-        <ul>
-            <li>Navigate to <em>Settings &gt; WTC Settings</em>.</li>
-            <li>Enter your Cloudflare credentials securely.</li>
-            <li>Adjust settings like Blocked Hits Threshold, Block Scope, and Block Mode.</li>
-        </ul>
-    </li>
-</ol>
+Table of Contents
 
-<img width="1245" alt="390536737-3bc8f71b-00b7-402c-8a5a-022b72958517" src="https://github.com/user-attachments/assets/2b70c58b-6889-44b6-8f72-377f415b12a2">
+• Free Features
 
+• Premium Features
 
-<h3 id="wordfence-settings">Wordfence Settings</h3>
+• Benefits
 
-<p>
-    Ensure Wordfence is installed and actively blocking malicious IPs. No additional configuration is needed within Wordfence for the plugin to function.
-</p>
+• Installation
 
-<h3 id="abuseipdb-integration">AbuseIPDB Integration</h3>
+• Usage
 
-<ol>
-    <li><strong>Sign Up for AbuseIPDB:</strong> Visit <a href="https://www.abuseipdb.com/">AbuseIPDB</a> and sign up for an API key.</li>
-    <li><strong>Enable Integration:</strong>
-        <ul>
-            <li>In the plugin settings, enter your AbuseIPDB API key.</li>
-            <li>Enable the <em>AbuseIPDB Lookup</em> option.</li>
-        </ul>
-    </li>
-</ol>
+• Frequently Asked Questions
 
-<img width="1242" alt="390537531-689a8d0e-e87b-44af-9e57-79cf111d0724" src="https://github.com/user-attachments/assets/124d8ae7-91ba-4493-afb3-30e19a369a0b">
+# Features
+Free Features:
 
+Automatic IP Synchronization
 
-<h3 id="whatismybrowsercom-integration">WhatIsMyBrowser.com Integration (Premium)</h3>
+Periodically checks for new blocked IPs in Wordfence and automatically adds them to Cloudflare's blocked IP list. This ensures that known malicious IPs are effectively blocked at the Cloudflare level, reducing the burden on your server.
 
-<ol>
-    <li><strong>Obtain API Key:</strong> Register at <a href="https://developers.whatismybrowser.com/api/">WhatIsMyBrowser.com</a> for an API key.</li>
-    <li><strong>Configure Integration:</strong>
-        <ul>
-            <li>Enter the API key in the plugin's settings under <em>WhatIsMyBrowser API Key</em>.</li>
-            <li>Enable the integration features as desired.</li>
-        </ul>
-    </li>
-</ol>
+# Customizable Settings
 
-<h2 id="usage">Usage</h2>
+Cloudflare Credentials: Securely store and manage your Cloudflare Email, API Key, Zone ID, and Account ID.
 
-<h3 id="automatic-ip-synchronization">Automatic IP Synchronization</h3>
+Blocked Hits Threshold: Set a threshold for blocked hits to determine which IPs should be synchronized.
 
-<p>
-    The plugin automatically syncs blocked IPs based on your configured cron interval. IPs exceeding the Blocked Hits Threshold are added to Cloudflare's firewall.
-</p>
+Block Scope: Choose between domain-specific or account-wide blocking on Cloudflare.
+Block Mode: Select the action to be taken on Cloudflare (e.g., Block, Managed Challenge).
 
-<h3 id="manual-synchronization">Manual Synchronization</h3>
+Cron Interval: Configure how frequently the plugin synchronizes blocked IPs (e.g., every 5 minutes, hourly).
 
-<p>
-    Navigate to <em>Settings &gt; WTC Settings</em> and click the <strong>Run Process</strong> button to trigger synchronization immediately.
-</p>
+Manual Synchronization
 
-<h3 id="captured-traffic-data">Captured Traffic Data (Premium)</h3>
+Manually trigger the synchronization process with a single click, ensuring immediate synchronization of blocked IPs when needed.
 
-<p>
-    Access detailed logs under the <em>Captured Traffic Data</em> tab. Analyze user agents, request methods, and more. Exclude specific user roles from logging in the settings.
-</p>
+AbuseIPDB Integration (Optional)
 
-<h3 id="advanced-rule-builder">Advanced Rule Builder (Premium)</h3>
+Enhanced IP Data: Fetch additional details about blocked IPs from AbuseIPDB, including Country Code, Usage Type, ISP, and Confidence Score.
 
-<p>
-    The plugin features a powerful <strong>Rule Builder</strong> that allows you to create custom security rules based on various criteria. You can define rules using conditions such as:
-</p>
+Country Code: Identify the geographic origin of blocked IPs.
 
-<ul>
-    <li><strong>Confidence Score:</strong> Set thresholds using operators like greater than, less than, equal to, etc.</li>
-    <li><strong>Is Whitelisted:</strong> Check if an IP is marked as whitelisted in AbuseIPDB.</li>
-    <li><strong>Is Abusive:</strong> Determine if an IP is associated with abusive behavior.</li>
-    <li><strong>Custom Criteria:</strong> Add other criteria based on the data captured.</li>
-</ul>
+Usage Type: Understand the nature of the entity using the IP (e.g., ISP, Commercial, Residential).
 
-<p>
-    Each rule can be assigned an <strong>Action</strong> (e.g., Block, Managed Challenge) that will be applied to IPs matching the rule. You can also assign a <strong>Priority</strong> to control the order in which rules are evaluated.
-</p>
+ISP Information: Obtain details about the Internet Service Provider of the blocked IP.
 
-<img width="1240" alt="Screenshot 2024-11-28 at 17 58 01" src="https://github.com/user-attachments/assets/7c3c405b-7a5f-4e86-ad35-f0128c288fcf">
+Confidence Score: Gauge how likely an IP is to be engaged in abusive behavior.
 
+Premium Features:
 
-<h3 id="rule-details-in-blocked-ips">Rule Details in Blocked IPs (Premium)</h3>
+Captured Traffic Data
 
-<p>
-    The <strong>Blocked IPs</strong> tab now includes a <em>Rule Details</em> column that displays comprehensive information about the rules that caused IPs to be blocked. This includes:
-</p>
+Traffic Logging: Capture and log traffic data, including IP addresses, user agents, request methods, and accessed URLs.
 
-<ul>
-    <li><strong>Criteria:</strong> The specific conditions that were met, such as confidence score thresholds, whitelisted status, and more.</li>
-    <li><strong>Action:</strong> The action taken by the rule (e.g., Block, Managed Challenge).</li>
-</ul>
+User Agent Analysis: Analyze user agents to detect potentially abusive or malicious clients.
 
-<p>
-    This enhancement allows administrators to easily identify which rules are triggering blocks and understand the reasons behind each IP being blocked. It provides greater transparency and aids in fine-tuning security settings.
-</p>
+Exclude User Roles: Option to exclude specific WordPress user roles from traffic logging.
 
-<h2 id="advanced-settings">Advanced Settings</h2>
+WhatIsMyBrowser.com API Integration
 
-<ul>
-    <li><strong>Blocked Hits Threshold:</strong> Define the minimum number of blocked hits before an IP is synchronized.</li>
-    <li><strong>Block Scope:</strong> Choose between domain-specific or account-wide blocking.</li>
-    <li><strong>Block Mode:</strong> Select the action for Cloudflare to take (e.g., Block, Challenge).</li>
-    <li><strong>Cron Interval:</strong> Set how frequently the plugin checks for new blocked IPs.</li>
-    <li><strong>Rule Priorities:</strong> Assign priorities to your rules to control the order of evaluation. Higher priority numbers are evaluated first.</li>
-    <li><strong>User Role Exclusions:</strong> Exclude specific WordPress user roles from traffic logging and rule evaluation.</li>
-</ul>
+Advanced User Agent Analysis: Obtain detailed information about user agents accessing your website, including software, operating systems, and more.
 
-<h2 id="faq">Frequently Asked Questions</h2>
+Abusive User Detection: Automatically detect and flag potentially abusive or malicious user agents based on API analysis.
 
-<h3>How do I obtain my Cloudflare Zone ID and Account ID?</h3>
+Automated Blocking: Option to send IPs associated with abusive user agents to Cloudflare directly from the Captured Traffic interface.
 
-<p>
-    <strong>Zone ID:</strong> Log into Cloudflare, select your domain, and find the Zone ID on the Overview page.<br />
-    <strong>Account ID:</strong> Click on your profile in Cloudflare; the Account ID is listed there.
-</p>
+Enhanced AbuseIPDB Integration
 
-<h3>Can I use an API Token instead of the Global API Key?</h3>
+Automatic Data Update: When AbuseIPDB data is fetched for an IP address, all existing entries with that IP in the Captured Traffic table are updated to reflect the latest data.
 
-<p>
-    Yes, ensure the API Token has the necessary permissions for firewall access.
-</p>
+Priority Support
 
-<h3>Is the plugin compatible with IPv6 addresses?</h3>
+Access to priority support for assistance with plugin setup and troubleshooting.
 
-<p>
-    Absolutely, the plugin supports both IPv4 and IPv6 addresses.
-</p>
+# Benefits
 
-<h3>How does the plugin handle my API keys?</h3>
+Enhanced Security
 
-<p>
-    All API keys are securely stored using WordPress's options API and are never exposed in plain text.
-</p>
+Combines the powerful IP blocking capabilities of Wordfence and Cloudflare to provide robust protection against malicious traffic.
 
-<h3>How do rule priorities work?</h3>
+Reduced Server Load
 
-<p>
-    Rule priorities determine the order in which your rules are evaluated. Rules with higher priority numbers are evaluated first. If traffic data matches a rule, the corresponding action is applied, and no further rules are evaluated for that IP address.
-</p>
+Offloads IP blocking to Cloudflare, reducing the burden on your server and improving performance.
 
-<h3>Can I see which rule blocked an IP?</h3>
+Comprehensive Traffic Analysis
 
-<p>
-    Yes, with the new <strong>Rule Details in Blocked IPs</strong> feature, you can view the exact rule criteria and action that caused an IP to be blocked. This information is displayed in the Blocked IPs tab under the Rule Details column.
-</p>
+Gain deeper insights into the traffic hitting your website, identify potential threats, and take proactive measures.
 
-<h3>How does the automatic action application work?</h3>
+Customizable Protection
 
-<p>
-    When traffic data is captured, the plugin immediately evaluates it against your defined rules. If a rule matches, the specified action is applied to the IP address without any manual intervention.
-</p>
+Tailor security measures to your specific needs with flexible settings and options.
 
-<h2 id="support">Support and Contribution</h2>
+Secure Credential Storage
 
-<p>
-    <strong>Support:</strong> For assistance, please open an issue on our <a href="https://github.com/itcssec/Wordfence2Cloudflare/issues">GitHub Issues</a> page or contact us at <a href="mailto:info@itcs.services">info@itcs.services</a>.
-</p>
+Cloudflare API keys and other sensitive data are securely stored using WordPress's built-in options API.
 
-<h2 id="license">License</h2>
+# Installation
 
-<p>
-    This project is licensed under the <a href="https://www.gnu.org/licenses/gpl-3.0.html">GNU General Public License v3.0</a>.
-</p>
+Upload Plugin
 
-<hr />
+Upload the wordfence-to-cloudflare directory to the /wp-content/plugins/ directory.
 
-<p>
-    <em>Thank you for using Wordfence to Cloudflare!</em> 
-</p>
+Alternatively, install the plugin through the WordPress Plugins screen directly.
 
-</body>
+Activate Plugin
+
+Activate the plugin through the 'Plugins' screen in WordPress.
+
+Configure Settings
+
+Navigate to Settings > WTC Settings in your WordPress dashboard.
+
+Enter your Cloudflare credentials and configure the desired settings.
+
+Usage
+
+Cloudflare Credentials
+
+Email: Your Cloudflare account email address.
+
+API Key: Your Cloudflare API key (Global API Key or API Token with appropriate permissions).
+
+Zone ID: The Zone ID of the domain you wish to protect.
+
+Account ID: Your Cloudflare Account ID.
+
+Configure Plugin Settings
+
+Blocked Hits Threshold: Set the minimum number of blocked hits before an IP is synchronized to Cloudflare.
+
+Block Scope: Choose 'Domain Specific' or 'Entire Account' for the scope of the block.
+
+Block Mode: Select the action to be taken (e.g., 'Block', 'Managed Challenge').
+
+Cron Interval: Set how frequently the synchronization should occur.
+
+AbuseIPDB Integration (Optional)
+
+API Key: Obtain an API key from AbuseIPDB and enter it in the plugin settings.
+
+Enable Lookup: Check the option to enable AbuseIPDB lookups.
+
+WhatIsMyBrowser.com Integration (Premium)
+
+API Key: Obtain an API key from WhatIsMyBrowser.com and enter it in the plugin settings.
+
+Enable Integration: Ensure the feature is enabled in the settings.
+
+Captured Traffic Data (Premium)
+
+Enable Traffic Capture: Enable traffic logging in the plugin settings.
+
+Exclude Roles: Select user roles to exclude from traffic logging.
+
+View Captured Data: Navigate to the 'Captured Traffic Data' tab to view and manage logged traffic.
+
+Manual Synchronization
+
+Click the 'Run Process' button in the plugin settings to manually trigger synchronization.
+
+Frequently Asked Questions
+Q1: Can I manually trigger the IP synchronization process?
+
+A: Yes, the plugin provides a 'Run Process' button in the settings. This allows you to manually trigger the synchronization process at any time.
+
+Q2: How is my Cloudflare API key stored?
+
+A: Your Cloudflare API key is securely stored in the WordPress options table using appropriate security measures. It is not displayed in plain text once saved.
+
+Q3: Can I customize which IPs are synchronized to Cloudflare?
+
+A: Yes, you can set a 'Blocked Hits Threshold' to determine which IPs should be synchronized based on the number of blocked hits.
+
+Q4: What are the requirements to use this plugin?
+
+A: You need an active account with Cloudflare and to have the Wordfence plugin installed and activated on your site. For optional features, you may need API keys from AbuseIPDB and WhatIsMyBrowser.com.
+
+Q5: How does the plugin reduce server load?
+
+A: By blocking malicious IPs at the Cloudflare level, the plugin prevents unwanted traffic from reaching your server, thereby reducing load and improving performance.
+
+Q6: Is the Captured Traffic Data feature available in the free version?
+
+A: No, the Captured Traffic Data feature is available in the premium version of the plugin.
+
+Q7: How do I obtain API keys for AbuseIPDB and WhatIsMyBrowser.com?
+
+A: Visit AbuseIPDB and WhatIsMyBrowser.com to sign up for accounts and obtain API keys.
+
+Q8: Can I exclude certain users from being logged in Captured Traffic Data?
+
+A: Yes, in the premium version, you can exclude specific WordPress user roles from being logged.
+
+Q9: Does the plugin support IPv6 addresses?
+
+A: Yes, the plugin supports both IPv4 and IPv6 addresses.
