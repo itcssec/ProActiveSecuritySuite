@@ -9,7 +9,7 @@ function wtc_check_custom_tables() {
     global $wpdb;
 
     $blocked_ips_table = $wpdb->prefix . 'wtc_blocked_ips';
-
+    $rules_table       = $wpdb->prefix . 'wtc_rules';
     $charset_collate = $wpdb->get_charset_collate();
 
     // Corrected Create Table Statement
@@ -32,6 +32,18 @@ function wtc_check_custom_tables() {
 
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
     dbDelta( $sql_blocked_ips );
+    // Create Rules Table
+    $sql_rules = "CREATE TABLE IF NOT EXISTS $rules_table (
+        id mediumint(9) NOT NULL AUTO_INCREMENT,
+        criteria text NOT NULL,
+        action varchar(50) NOT NULL,
+        priority int(11) DEFAULT 0 NOT NULL,
+        PRIMARY KEY  (id)
+    ) $charset_collate;";
+    
+    // After creating other tables
+    dbDelta( $sql_rules );
+
 }
 add_action( 'init', 'wtc_check_custom_tables' );
 
