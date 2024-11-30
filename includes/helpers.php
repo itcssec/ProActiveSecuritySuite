@@ -65,15 +65,15 @@ function wtc_update_cron_schedule() {
 function wtc_custom_cron_schedules( $schedules ) {
     $schedules['5min'] = array(
         'interval' => 300, // 5 minutes in seconds.
-        'display'  => __( 'Every 5 Minutes', 'blocked-ips-for-wordfence-to-cloudflare' ),
+        'display'  => __( 'Every 5 Minutes', 'proactive-security-suite' ),
     );
     $schedules['1min'] = array(
         'interval' => 60, // 1 minute in seconds.
-        'display'  => __( 'Every Minute', 'blocked-ips-for-wordfence-to-cloudflare' ),
+        'display'  => __( 'Every Minute', 'proactive-security-suite' ),
     );
     $schedules['15min'] = array(
         'interval' => 900, // 15 minutes in seconds.
-        'display'  => __( 'Every 15 Minutes', 'blocked-ips-for-wordfence-to-cloudflare' ),
+        'display'  => __( 'Every 15 Minutes', 'proactive-security-suite' ),
     );
     return $schedules;
 }

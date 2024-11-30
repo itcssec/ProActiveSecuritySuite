@@ -269,7 +269,7 @@ function wtc_render_ips_tab() {
     // we do not need to enqueue scripts or initialize the table again here.
 
     ?>
-    <h2><?php esc_html_e( 'Blocked IPs', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></h2>
+    <h2><?php esc_html_e( 'Blocked IPs', 'proactive-security-suite' ); ?></h2>
 
     <style>
     /* Custom styles for the checkbox column */
@@ -288,17 +288,17 @@ function wtc_render_ips_tab() {
     <table id="wtc-ips-table" class="wp-list-table widefat fixed striped">
         <thead>
             <tr>
-                <th><?php esc_html_e( 'ID', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
-                <th><?php esc_html_e( 'Blocked Time', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
-                <th><?php esc_html_e( 'IP', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
-                <th><?php esc_html_e( 'Rule Details', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
-                <th><?php esc_html_e( 'Country Code', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
-                <th><?php esc_html_e( 'Usage Type', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
-                <th><?php esc_html_e( 'ISP', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
-                <th><?php esc_html_e( 'Confidence Score', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
-                <th><?php esc_html_e( 'Block Mode', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
-                <th><?php esc_html_e( 'CF Response', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
-                <th><?php esc_html_e( 'Is Sent', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></th>
+                <th><?php esc_html_e( 'ID', 'proactive-security-suite' ); ?></th>
+                <th><?php esc_html_e( 'Blocked Time', 'proactive-security-suite' ); ?></th>
+                <th><?php esc_html_e( 'IP', 'proactive-security-suite' ); ?></th>
+                <th><?php esc_html_e( 'Rule Details', 'proactive-security-suite' ); ?></th>
+                <th><?php esc_html_e( 'Country Code', 'proactive-security-suite' ); ?></th>
+                <th><?php esc_html_e( 'Usage Type', 'proactive-security-suite' ); ?></th>
+                <th><?php esc_html_e( 'ISP', 'proactive-security-suite' ); ?></th>
+                <th><?php esc_html_e( 'Confidence Score', 'proactive-security-suite' ); ?></th>
+                <th><?php esc_html_e( 'Block Mode', 'proactive-security-suite' ); ?></th>
+                <th><?php esc_html_e( 'CF Response', 'proactive-security-suite' ); ?></th>
+                <th><?php esc_html_e( 'Is Sent', 'proactive-security-suite' ); ?></th>
                 <th class="wtc-checkbox-column">
                     <div class="wtc-checkbox-column-header">
                         <input type="checkbox" id="wtc-select-all">
@@ -325,10 +325,10 @@ function wtc_render_ips_tab() {
                                         echo esc_html( ucfirst( str_replace( '_', ' ', $key ) ) . ': ' . $value ) . '<br>';
                                     }
                                 }
-                                echo '<strong>' . esc_html__( 'Action:', 'blocked-ips-for-wordfence-to-cloudflare' ) . '</strong> ' . esc_html( ucfirst( str_replace( '_', ' ', $rule_details['action'] ) ) );
+                                echo '<strong>' . esc_html__( 'Action:', 'proactive-security-suite' ) . '</strong> ' . esc_html( ucfirst( str_replace( '_', ' ', $rule_details['action'] ) ) );
                             }
                         } else {
-                            echo esc_html__( 'N/A', 'blocked-ips-for-wordfence-to-cloudflare' );
+                            echo esc_html__( 'N/A', 'proactive-security-suite' );
                         }
                         ?>
                     </td>
@@ -347,8 +347,8 @@ function wtc_render_ips_tab() {
         </tbody>
     </table>
 
-    <button id="wtc-delete-selected" class="button button-primary"><?php esc_html_e( 'Delete Selected', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></button>
-    <button id="wtc-delete-selected-cloudflare" class="button button-primary"><?php esc_html_e( 'Delete Selected (Cloudflare)', 'blocked-ips-for-wordfence-to-cloudflare' ); ?></button>
+    <button id="wtc-delete-selected" class="button button-primary"><?php esc_html_e( 'Delete Selected', 'proactive-security-suite' ); ?></button>
+    <button id="wtc-delete-selected-cloudflare" class="button button-primary"><?php esc_html_e( 'Delete Selected (Cloudflare)', 'proactive-security-suite' ); ?></button>
 
     <?php
 }

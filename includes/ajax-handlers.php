@@ -34,14 +34,43 @@ function wtc_delete_ips() {
 add_action( 'wp_ajax_wtc_delete_ips', 'wtc_delete_ips' );
 
 // AJAX handler for deleting IPs from Cloudflare.
+// AJAX handler for deleting IPs from Cloudflare.
 function wtc_delete_ips_cloudflare() {
     // Verify the nonce before processing the request.
     check_ajax_referer( 'wtc_ips_tab_action', 'wtc_ips_tab_nonce' );
 
-    if ( ! current_user_can( 'manage_options' ) || empty( $_POST['ips'] ) ) {
+    if ( ! current_user_can( 'manage_options' ) ) {
         wp_send_json_error( array(
             'type'    => 'error',
-            'message' => 'Invalid request data.',
+            'message' => 'Access is not allowed.',
+        ) );
+        wp_die();
+    }
+
+    // Sanitize and validate the IPs from $_POST['ips']
+    $ips_raw = isset( $_POST['ips'] ) ? wp_unslash( $_POST['ips'] ) : array();
+
+    if ( ! is_array( $ips_raw ) ) {
+        wp_send_json_error( array(
+            'type'    => 'error',
+            'message' => 'Invalid IP data.',
+        ) );
+        wp_die();
+    }
+
+    $ips_to_delete = array();
+
+    foreach ( $ips_raw as $ip ) {
+        $ip = trim( $ip );
+        if ( filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+            $ips_to_delete[] = $ip;
+        }
+    }
+
+    if ( empty( $ips_to_delete ) ) {
+        wp_send_json_error( array(
+            'type'    => 'error',
+            'message' => 'No valid IPs provided.',
         ) );
         wp_die();
     }
@@ -50,7 +79,6 @@ function wtc_delete_ips_cloudflare() {
     $cf_account_id = get_option( 'cloudflare_account_id' );
     $cf_api_key    = get_option( 'cloudflare_key' );
     $cf_email      = get_option( 'cloudflare_email' );
-    
 
     if ( ! $cf_zone_id || ! $cf_api_key || ! $cf_email ) {
         wp_send_json_error( array(
@@ -60,100 +88,75 @@ function wtc_delete_ips_cloudflare() {
         wp_die();
     }
 
-    $ips_to_delete = $_POST['ips'];
-    $deleted_ips   = array();
+    $deleted_ips = array();
 
     foreach ( $ips_to_delete as $ip ) {
         // Construct the API URL to fetch the access rule for the IP.
-        $api_url = "https://api.cloudflare.com/client/v4/zones/{$cf_zone_id}/firewall/access_rules/rules?configuration.value={$ip}";
+        $api_url = 'https://api.cloudflare.com/client/v4/zones/' . urlencode( $cf_zone_id ) . '/firewall/access_rules/rules?configuration.value=' . urlencode( $ip );
+
         $headers = array(
-            "Content-Type: application/json",
-            "X-Auth-Email: {$cf_email}",
-            "X-Auth-Key: {$cf_api_key}",
+            'Content-Type' => 'application/json',
+            'X-Auth-Email' => $cf_email,
+            'X-Auth-Key'   => $cf_api_key,
         );
 
         // Get all IP access rules from Cloudflare.
-        $curl = curl_init();
-        curl_setopt_array( $curl, array(
-            CURLOPT_URL            => $api_url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING       => "",
-            CURLOPT_MAXREDIRS      => 10,
-            CURLOPT_TIMEOUT        => 30,
-            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST  => "GET",
-            CURLOPT_HTTPHEADER     => $headers,
-        ) );
-        $response = curl_exec( $curl );
-        $err      = curl_error( $curl );
-        curl_close( $curl );
+        $args = array(
+            'headers' => $headers,
+            'method'  => 'GET',
+            'timeout' => 30,
+        );
 
-        if ( $err ) {
-            $error_message = "Failed to fetch IP access rules from Cloudflare for IP: {$ip} - Error: {$err}";
-            error_log( $error_message );
+        $response = wp_remote_get( $api_url, $args );
+
+        if ( is_wp_error( $response ) ) {
+            // Handle the error appropriately.
             continue;
         }
 
-        $data = json_decode( $response, true );
-
-        // Log the data received from Cloudflare.
-        error_log( "Data received from Cloudflare for IP: {$ip}" );
-        error_log( print_r( $data, true ) );
+        $data = json_decode( wp_remote_retrieve_body( $response ), true );
 
         if ( empty( $data['result'] ) ) {
-            $error_message = "No matching IP access rule found in Cloudflare for IP: {$ip}";
-            error_log( $error_message );
+            // No matching IP access rule found in Cloudflare.
             continue;
         }
 
         $matchedRuleId   = $data['result'][0]['id'];
         $matchedRuleType = $data['result'][0]['scope']['type'];
-        //error_log( "Matched Rule ID: " . $matchedRuleId );
-        //error_log( "Matched Rule Type: " . $matchedRuleType );
 
         // Delete the matched IP rule from Cloudflare.
-        if ( $matchedRuleType == 'zone' ) {
-            $delete_url = "https://api.cloudflare.com/client/v4/zones/{$cf_zone_id}/firewall/access_rules/rules/{$matchedRuleId}";
+        if ( $matchedRuleType === 'zone' ) {
+            $delete_url = 'https://api.cloudflare.com/client/v4/zones/' . urlencode( $cf_zone_id ) . '/firewall/access_rules/rules/' . urlencode( $matchedRuleId );
         } else {
-            $delete_url = "https://api.cloudflare.com/client/v4/accounts/{$cf_account_id}/firewall/access_rules/rules/{$matchedRuleId}";
+            $delete_url = 'https://api.cloudflare.com/client/v4/accounts/' . urlencode( $cf_account_id ) . '/firewall/access_rules/rules/' . urlencode( $matchedRuleId );
         }
 
-        $curl = curl_init();
-        curl_setopt_array( $curl, array(
-            CURLOPT_URL            => $delete_url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CUSTOMREQUEST  => "DELETE",
-            CURLOPT_HTTPHEADER     => $headers,
-        ) );
-        $delete_response = curl_exec( $curl );
-        $delete_err      = curl_error( $curl );
-        curl_close( $curl );
+        $delete_args = array(
+            'headers' => $headers,
+            'method'  => 'DELETE',
+            'timeout' => 30,
+        );
 
-        if ( $delete_err ) {
-            $error_message = "Failed to delete IP access rule for IP: {$ip} from Cloudflare - Error: {$delete_err}";
-            error_log( $error_message );
+        $delete_response = wp_remote_request( $delete_url, $delete_args );
+
+        if ( is_wp_error( $delete_response ) ) {
+            // Handle the error appropriately.
             continue;
         }
 
-        $delete_data = json_decode( $delete_response, true );
-        //error_log( "Data received from Delete Cloudflare for IP: {$ip}" );
-        //error_log( print_r( $delete_data, true ) );
-
-        if ( ! empty( $delete_data['messages'] ) ) {
-            foreach ( $delete_data['messages'] as $message ) {
-                error_log( "Message: " . $message );
-            }
-        }
+        $delete_data = json_decode( wp_remote_retrieve_body( $delete_response ), true );
 
         if ( ! empty( $delete_data['success'] ) && $delete_data['success'] === true ) {
             $deleted_ips[] = $ip;
+
             global $wpdb;
             $table_name = $wpdb->prefix . 'wtc_blocked_ips';
+
             // Delete the IP from the custom table.
             $wpdb->delete( $table_name, array( 'ip' => $ip ), array( '%s' ) );
         } else {
-            $error_message = "Failed to delete IP access rule for IP: {$ip} from Cloudflare. Response: " . print_r( $delete_data, true );
-            error_log( $error_message );
+            // Handle the error appropriately.
+            continue;
         }
     }
 

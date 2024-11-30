@@ -8,7 +8,7 @@ if ( !defined( 'ABSPATH' ) ) {
 require_once WTC_PLUGIN_DIR . 'includes/helpers.php';
 // Add settings link to plugin page.
 function wtc_add_settings_link(  $links  ) {
-    $settings_link = '<a href="' . esc_url( admin_url( 'options-general.php?page=pss-settings' ) ) . '">' . __( 'Settings', 'blocked-ips-for-wordfence-to-cloudflare' ) . '</a>';
+    $settings_link = '<a href="' . esc_url( admin_url( 'options-general.php?page=pss-settings' ) ) . '">' . __( 'Settings', 'proactive-security-suite' ) . '</a>';
     array_unshift( $links, $settings_link );
     return $links;
 }
@@ -35,7 +35,7 @@ function wtc_render_admin_page() {
     ?>
     <div class="wrap">
         <h1><?php 
-    esc_html_e( 'Wordfence to Cloudflare', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Wordfence to Cloudflare', 'proactive-security-suite' );
     ?></h1>
 
         <!-- Add Tabs -->
@@ -43,24 +43,24 @@ function wtc_render_admin_page() {
             <a href="?page=pss-settings" class="nav-tab <?php 
     echo ( $active_tab === 'pss-settings' ? 'nav-tab-active' : '' );
     ?>"><?php 
-    esc_html_e( 'Settings', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Settings', 'proactive-security-suite' );
     ?></a>
             <a href="?page=pss-settings&tab=wtc-ips" class="nav-tab <?php 
     echo ( $active_tab === 'wtc-ips' ? 'nav-tab-active' : '' );
     ?>"><?php 
-    esc_html_e( 'Blocked IPs', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Blocked IPs', 'proactive-security-suite' );
     ?></a>
             <?php 
     ?>
                 <a href="#" class="nav-tab disabled"><?php 
-    esc_html_e( 'Captured Traffic Data', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Captured Traffic Data', 'proactive-security-suite' );
     ?> <?php 
-    esc_html_e( '(Premium)', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( '(Premium)', 'proactive-security-suite' );
     ?></a>
                 <a href="#" class="nav-tab disabled"><?php 
-    esc_html_e( 'Rule Builder', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Rule Builder', 'proactive-security-suite' );
     ?> <?php 
-    esc_html_e( '(Premium)', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( '(Premium)', 'proactive-security-suite' );
     ?></a>
             <?php 
     ?>
@@ -73,7 +73,7 @@ function wtc_render_admin_page() {
             wtc_render_ips_tab();
             break;
         case 'wtc-traffic':
-            echo '<div class="notice notice-warning"><p>' . esc_html__( 'The Captured Traffic Data feature is available in the premium version. Please upgrade to access this feature.', 'blocked-ips-for-wordfence-to-cloudflare' ) . '</p></div>';
+            echo '<div class="notice notice-warning"><p>' . esc_html__( 'The Captured Traffic Data feature is available in the premium version. Please upgrade to access this feature.', 'proactive-security-suite' ) . '</p></div>';
             // Add an upgrade button
             if ( function_exists( 'wor_fs' ) ) {
                 wor_fs()->get_logger()->warning( 'Attempted access to premium tab: Captured Traffic Data' );
@@ -81,7 +81,7 @@ function wtc_render_admin_page() {
             }
             break;
         case 'wtc-rules':
-            echo '<div class="notice notice-warning"><p>' . esc_html__( 'The Rule Builder feature is available in the premium version. Please upgrade to access this feature.', 'blocked-ips-for-wordfence-to-cloudflare' ) . '</p></div>';
+            echo '<div class="notice notice-warning"><p>' . esc_html__( 'The Rule Builder feature is available in the premium version. Please upgrade to access this feature.', 'proactive-security-suite' ) . '</p></div>';
             // Add an upgrade button
             if ( function_exists( 'wor_fs' ) ) {
                 wor_fs()->get_logger()->warning( 'Attempted access to premium tab: Rule Builder' );
@@ -137,7 +137,7 @@ function wtc_render_settings_tab() {
         add_settings_error(
             'wtc_settings',
             'wtc_settings_updated',
-            __( 'Settings saved.', 'blocked-ips-for-wordfence-to-cloudflare' ),
+            __( 'Settings saved.', 'proactive-security-suite' ),
             'updated'
         );
     }
@@ -168,7 +168,7 @@ function wtc_render_settings_tab() {
     ?>
     <div class="wrap">
         <h1><?php 
-    esc_html_e( 'Settings', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Settings', 'proactive-security-suite' );
     ?></h1>
         <form method="post" action="">
             <?php 
@@ -178,7 +178,7 @@ function wtc_render_settings_tab() {
                 <!-- Cloudflare Settings -->
                 <tr valign="top">
                     <th scope="row"><?php 
-    esc_html_e( 'Cloudflare Email', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Cloudflare Email', 'proactive-security-suite' );
     ?></th>
                     <td><input type="email" name="cloudflare_email" value="<?php 
     echo esc_attr( $cloudflare_email );
@@ -186,7 +186,7 @@ function wtc_render_settings_tab() {
                 </tr>
                 <tr valign="top">
                     <th scope="row"><?php 
-    esc_html_e( 'Cloudflare Key', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Cloudflare Key', 'proactive-security-suite' );
     ?></th>
                     <td><input type="password" name="cloudflare_key" value="<?php 
     echo esc_attr( str_repeat( '*', 10 ) );
@@ -194,7 +194,7 @@ function wtc_render_settings_tab() {
                 </tr>
                 <tr valign="top">
                     <th scope="row"><?php 
-    esc_html_e( 'Cloudflare Zone ID', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Cloudflare Zone ID', 'proactive-security-suite' );
     ?></th>
                     <td><input type="text" name="cloudflare_zone_id" value="<?php 
     echo esc_attr( $cloudflare_zone_id );
@@ -202,7 +202,7 @@ function wtc_render_settings_tab() {
                 </tr>
                 <tr valign="top">
                     <th scope="row"><?php 
-    esc_html_e( 'Cloudflare Account ID', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Cloudflare Account ID', 'proactive-security-suite' );
     ?></th>
                     <td><input type="text" name="cloudflare_account_id" value="<?php 
     echo esc_attr( $cloudflare_account_id );
@@ -212,7 +212,7 @@ function wtc_render_settings_tab() {
                 <!-- AbuseIPDB Settings -->
                 <tr valign="top">
                     <th scope="row"><?php 
-    esc_html_e( 'AbuseIPDB API Key', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'AbuseIPDB API Key', 'proactive-security-suite' );
     ?></th>
                     <td>
                         <?php 
@@ -232,7 +232,7 @@ function wtc_render_settings_tab() {
                 </tr>
                 <tr valign="top">
                     <th scope="row"><?php 
-    esc_html_e( 'Enable AbuseIPDB Lookup', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Enable AbuseIPDB Lookup', 'proactive-security-suite' );
     ?></th>
                     <td><input type="checkbox" name="wtc_enable_abuseipdb" value="yes" <?php 
     checked( 'yes', $wtc_enable_abuseipdb );
@@ -245,47 +245,47 @@ function wtc_render_settings_tab() {
                     <!-- WhatIsMyBrowser API Key (Disabled) -->
                     <tr valign="top">
                         <th scope="row"><?php 
-    esc_html_e( 'WhatIsMyBrowser API Key', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'WhatIsMyBrowser API Key', 'proactive-security-suite' );
     ?></th>
                         <td>
                             <input type="password" disabled value="" />
                             <p class="description"><?php 
-    esc_html_e( 'Available in the premium version.', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Available in the premium version.', 'proactive-security-suite' );
     ?></p>
                         </td>
                     </tr>
                     <!-- Enable Traffic Capture (Disabled) -->
                     <tr valign="top">
                         <th scope="row"><?php 
-    esc_html_e( 'Enable Traffic Capture', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Enable Traffic Capture', 'proactive-security-suite' );
     ?></th>
                         <td>
                             <input type="checkbox" disabled />
                             <p class="description"><?php 
-    esc_html_e( 'Available in the premium version.', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Available in the premium version.', 'proactive-security-suite' );
     ?></p>
                         </td>
                     </tr>
                     <!-- Enable AbuseIPDB Lookup for Captured Traffic (Disabled) -->
                     <tr valign="top">
                         <th scope="row"><?php 
-    esc_html_e( 'Enable AbuseIPDB Lookup for Captured Traffic', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Enable AbuseIPDB Lookup for Captured Traffic', 'proactive-security-suite' );
     ?></th>
                         <td>
                             <input type="checkbox" disabled />
                             <p class="description"><?php 
-    esc_html_e( 'Available in the premium version.', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Available in the premium version.', 'proactive-security-suite' );
     ?></p>
                         </td>
                     </tr>
                     <!-- Exclude Roles from Captured Traffic (Disabled) -->
                     <tr valign="top">
                         <th scope="row"><?php 
-    esc_html_e( 'Exclude Roles from Captured Traffic', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Exclude Roles from Captured Traffic', 'proactive-security-suite' );
     ?></th>
                         <td>
                             <p class="description"><?php 
-    esc_html_e( 'Available in the premium version.', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Available in the premium version.', 'proactive-security-suite' );
     ?></p>
                         </td>
                     </tr>
@@ -295,7 +295,7 @@ function wtc_render_settings_tab() {
                 <!-- Blocked Hits Threshold -->
                 <tr valign="top">
                     <th scope="row"><?php 
-    esc_html_e( 'Blocked Hits Threshold', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Blocked Hits Threshold', 'proactive-security-suite' );
     ?></th>
                     <td><input type="number" min="0" name="blocked_hits_threshold" value="<?php 
     echo esc_attr( $blocked_hits_threshold );
@@ -305,19 +305,19 @@ function wtc_render_settings_tab() {
                 <!-- Block Scope -->
                 <tr valign="top">
                     <th scope="row"><?php 
-    esc_html_e( 'Block Scope', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Block Scope', 'proactive-security-suite' );
     ?></th>
                     <td>
                         <select name="block_scope">
                             <option value="domain" <?php 
     selected( 'domain', $block_scope );
     ?>><?php 
-    esc_html_e( 'Domain Specific', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Domain Specific', 'proactive-security-suite' );
     ?></option>
                             <option value="account" <?php 
     selected( 'account', $block_scope );
     ?>><?php 
-    esc_html_e( 'Entire Account', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Entire Account', 'proactive-security-suite' );
     ?></option>
                         </select>
                     </td>
@@ -326,19 +326,19 @@ function wtc_render_settings_tab() {
                 <!-- Block Mode -->
                 <tr valign="top">
                     <th scope="row"><?php 
-    esc_html_e( 'Block Mode', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Block Mode', 'proactive-security-suite' );
     ?></th>
                     <td>
                         <select name="block_mode">
                             <option value="block" <?php 
     selected( 'block', $block_mode );
     ?>><?php 
-    esc_html_e( 'Block', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Block', 'proactive-security-suite' );
     ?></option>
                             <option value="managed_challenge" <?php 
     selected( 'managed_challenge', $block_mode );
     ?>><?php 
-    esc_html_e( 'Managed Challenge', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Managed Challenge', 'proactive-security-suite' );
     ?></option>
                             <!-- Add other modes as needed -->
                         </select>
@@ -348,39 +348,39 @@ function wtc_render_settings_tab() {
                 <!-- Cron Interval -->
                 <tr valign="top">
                     <th scope="row"><?php 
-    esc_html_e( 'Cron Interval', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Cron Interval', 'proactive-security-suite' );
     ?></th>
                     <td>
                         <select name="cron_interval">
                             <option value="none" <?php 
     selected( 'none', $cron_interval );
     ?>><?php 
-    esc_html_e( 'Not Set', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Not Set', 'proactive-security-suite' );
     ?></option>
                             <option value="1min" <?php 
     selected( '1min', $cron_interval );
     ?>><?php 
-    esc_html_e( 'Every Minute', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Every Minute', 'proactive-security-suite' );
     ?></option>
                             <option value="5min" <?php 
     selected( '5min', $cron_interval );
     ?>><?php 
-    esc_html_e( 'Every 5 Minutes', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Every 5 Minutes', 'proactive-security-suite' );
     ?></option>
                             <option value="hourly" <?php 
     selected( 'hourly', $cron_interval );
     ?>><?php 
-    esc_html_e( '1 hour', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( '1 hour', 'proactive-security-suite' );
     ?></option>
                             <option value="twicedaily" <?php 
     selected( 'twicedaily', $cron_interval );
     ?>><?php 
-    esc_html_e( '12 hours', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( '12 hours', 'proactive-security-suite' );
     ?></option>
                             <option value="daily" <?php 
     selected( 'daily', $cron_interval );
     ?>><?php 
-    esc_html_e( '24 hours', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( '24 hours', 'proactive-security-suite' );
     ?></option>
                         </select>
                     </td>
@@ -389,12 +389,12 @@ function wtc_render_settings_tab() {
 
             <!-- Cron Status -->
             <h2><?php 
-    esc_html_e( 'Cron Status', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Cron Status', 'proactive-security-suite' );
     ?></h2>
             <table class="form-table">
                 <tr valign="top">
                     <th scope="row"><?php 
-    esc_html_e( 'Last Cron Run:', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Last Cron Run:', 'proactive-security-suite' );
     ?></th>
                     <td><?php 
     echo esc_html( $wtc_last_processed_time );
@@ -402,7 +402,7 @@ function wtc_render_settings_tab() {
                 </tr>
                 <tr valign="top">
                     <th scope="row"><?php 
-    esc_html_e( 'IPs Processed:', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'IPs Processed:', 'proactive-security-suite' );
     ?></th>
                     <td><?php 
     echo esc_html( $wtc_processed_ips_count );
@@ -411,7 +411,7 @@ function wtc_render_settings_tab() {
             </table>
 
             <?php 
-    submit_button( __( 'Save Settings', 'blocked-ips-for-wordfence-to-cloudflare' ), 'primary', 'wtc_settings_submit' );
+    submit_button( __( 'Save Settings', 'proactive-security-suite' ), 'primary', 'wtc_settings_submit' );
     ?>
         </form>
 
@@ -423,7 +423,7 @@ function wtc_render_settings_tab() {
     wp_nonce_field( 'wtc_run_process_action', 'wtc_run_process_nonce' );
     ?>
             <button type="submit" name="wtc_run_process" class="button button-primary"><?php 
-    esc_html_e( 'Run Process', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Run Process', 'proactive-security-suite' );
     ?></button>
         </form>
 
@@ -437,7 +437,7 @@ function wtc_render_settings_tab() {
     ?>
             <input type="hidden" name="action" value="wtc_clear_data">
             <button type="submit" name="wtc_clear_data" class="button button-secondary"><?php 
-    esc_html_e( 'Clear Data', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Clear Data', 'proactive-security-suite' );
     ?></button>
         </form>
 
@@ -559,20 +559,20 @@ function wtc_render_rule_builder_tab() {
     // Display any messages.
     if ( isset( $_GET['message'] ) ) {
         if ( $_GET['message'] === 'rule_added' ) {
-            echo '<div class="notice notice-success"><p>' . esc_html__( 'Rule added successfully.', 'blocked-ips-for-wordfence-to-cloudflare' ) . '</p></div>';
+            echo '<div class="notice notice-success"><p>' . esc_html__( 'Rule added successfully.', 'proactive-security-suite' ) . '</p></div>';
         } elseif ( $_GET['message'] === 'rule_deleted' ) {
-            echo '<div class="notice notice-success"><p>' . esc_html__( 'Rule deleted successfully.', 'blocked-ips-for-wordfence-to-cloudflare' ) . '</p></div>';
+            echo '<div class="notice notice-success"><p>' . esc_html__( 'Rule deleted successfully.', 'proactive-security-suite' ) . '</p></div>';
         }
     }
     ?>
     <h2><?php 
-    esc_html_e( 'Rule Builder', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Rule Builder', 'proactive-security-suite' );
     ?></h2>
 
     <!-- Disclaimer -->
     <div class="notice notice-warning">
         <p><?php 
-    esc_html_e( 'Please use automatic mitigation rules with caution. Misconfigured rules may block legitimate traffic, including known bots. Always ensure that "isWhitelisted" is set to "false" when creating rules based on confidence scores.', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Please use automatic mitigation rules with caution. Misconfigured rules may block legitimate traffic, including known bots. Always ensure that "isWhitelisted" is set to "false" when creating rules based on confidence scores.', 'proactive-security-suite' );
     ?></p>
     </div>
 
@@ -581,16 +581,16 @@ function wtc_render_rule_builder_tab() {
         <thead>
             <tr>
                 <th><?php 
-    esc_html_e( 'Priority', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Priority', 'proactive-security-suite' );
     ?></th>
                 <th><?php 
-    esc_html_e( 'Criteria', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Criteria', 'proactive-security-suite' );
     ?></th>
                 <th><?php 
-    esc_html_e( 'Action', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Action', 'proactive-security-suite' );
     ?></th>
                 <th><?php 
-    esc_html_e( 'Manage', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Manage', 'proactive-security-suite' );
     ?></th>
             </tr>
         </thead>
@@ -633,7 +633,7 @@ function wtc_render_rule_builder_tab() {
                 'rule_id' => $rule->id,
             ), admin_url( 'options-general.php?page=pss-settings&tab=wtc-rules' ) ), 'wtc_delete_rule_nonce' ) );
             ?>"><?php 
-            esc_html_e( 'Delete', 'blocked-ips-for-wordfence-to-cloudflare' );
+            esc_html_e( 'Delete', 'proactive-security-suite' );
             ?></a>
                         </td>
                     </tr>
@@ -645,7 +645,7 @@ function wtc_render_rule_builder_tab() {
         ?>
                 <tr>
                     <td colspan="4"><?php 
-        esc_html_e( 'No rules defined.', 'blocked-ips-for-wordfence-to-cloudflare' );
+        esc_html_e( 'No rules defined.', 'proactive-security-suite' );
         ?></td>
                 </tr>
             <?php 
@@ -656,7 +656,7 @@ function wtc_render_rule_builder_tab() {
 
     <!-- Add New Rule Form -->
     <h3><?php 
-    esc_html_e( 'Add New Rule', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Add New Rule', 'proactive-security-suite' );
     ?></h3>
     <form method="post" action="">
         <?php 
@@ -666,24 +666,24 @@ function wtc_render_rule_builder_tab() {
             <!-- Confidence Score Criteria -->
             <tr valign="top">
                 <th scope="row"><?php 
-    esc_html_e( 'Confidence Score', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Confidence Score', 'proactive-security-suite' );
     ?></th>
                 <td>
                     <select name="confidence_score_operator">
                         <option value=">"><?php 
-    esc_html_e( '>', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( '>', 'proactive-security-suite' );
     ?></option>
                         <option value=">="><?php 
-    esc_html_e( '>=', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( '>=', 'proactive-security-suite' );
     ?></option>
                         <option value="<"><?php 
-    esc_html_e( '<', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( '<', 'proactive-security-suite' );
     ?></option>
                         <option value="<="><?php 
-    esc_html_e( '<=', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( '<=', 'proactive-security-suite' );
     ?></option>
                         <option value="="><?php 
-    esc_html_e( '=', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( '=', 'proactive-security-suite' );
     ?></option>
                     </select>
                     <input type="number" name="confidence_score_value" min="0" max="100" />
@@ -692,18 +692,18 @@ function wtc_render_rule_builder_tab() {
             <!-- isWhitelisted Criteria -->
             <tr valign="top">
                 <th scope="row"><?php 
-    esc_html_e( 'Is Whitelisted', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Is Whitelisted', 'proactive-security-suite' );
     ?></th>
                 <td>
                     <select name="is_whitelisted">
                         <option value=""><?php 
-    esc_html_e( 'Any', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Any', 'proactive-security-suite' );
     ?></option>
                         <option value="true"><?php 
-    esc_html_e( 'True', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'True', 'proactive-security-suite' );
     ?></option>
                         <option value="false"><?php 
-    esc_html_e( 'False', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'False', 'proactive-security-suite' );
     ?></option>
                     </select>
                 </td>
@@ -711,18 +711,18 @@ function wtc_render_rule_builder_tab() {
             <!-- is_abusive Criteria -->
             <tr valign="top">
                 <th scope="row"><?php 
-    esc_html_e( 'Is Abusive', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Is Abusive', 'proactive-security-suite' );
     ?></th>
                 <td>
                     <select name="is_abusive">
                         <option value=""><?php 
-    esc_html_e( 'Any', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Any', 'proactive-security-suite' );
     ?></option>
                         <option value="true"><?php 
-    esc_html_e( 'True', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'True', 'proactive-security-suite' );
     ?></option>
                         <option value="false"><?php 
-    esc_html_e( 'False', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'False', 'proactive-security-suite' );
     ?></option>
                     </select>
                 </td>
@@ -730,15 +730,15 @@ function wtc_render_rule_builder_tab() {
             <!-- Action -->
             <tr valign="top">
                 <th scope="row"><?php 
-    esc_html_e( 'Cloudflare Action', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Cloudflare Action', 'proactive-security-suite' );
     ?></th>
                 <td>
                     <select name="action">
                         <option value="block"><?php 
-    esc_html_e( 'Block', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Block', 'proactive-security-suite' );
     ?></option>
                         <option value="managed_challenge"><?php 
-    esc_html_e( 'Managed Challenge', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Managed Challenge', 'proactive-security-suite' );
     ?></option>
                         <!-- Add other actions as needed -->
                     </select>
@@ -747,19 +747,19 @@ function wtc_render_rule_builder_tab() {
             <!-- Priority -->
             <tr valign="top">
                 <th scope="row"><?php 
-    esc_html_e( 'Priority', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Priority', 'proactive-security-suite' );
     ?></th>
                 <td>
                     <input type="number" name="priority" min="0" value="0" />
                     <p class="description"><?php 
-    esc_html_e( 'Higher priority rules are evaluated first.', 'blocked-ips-for-wordfence-to-cloudflare' );
+    esc_html_e( 'Higher priority rules are evaluated first.', 'proactive-security-suite' );
     ?></p>
                 </td>
             </tr>
         </table>
 
         <?php 
-    submit_button( __( 'Add Rule', 'blocked-ips-for-wordfence-to-cloudflare' ) );
+    submit_button( __( 'Add Rule', 'proactive-security-suite' ) );
     ?>
     </form>
     <?php 

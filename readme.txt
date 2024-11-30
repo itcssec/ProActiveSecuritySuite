@@ -1,4 +1,4 @@
-=== Wordfence2Cloudflare ===
+=== ProActive Security Suite ===
 Contributors: ITCS, freemius
 Tags: Wordfence, Cloudflare, Security, Wordpress Security, Firewall
 Requires at least: 5.2
