@@ -14,7 +14,7 @@ function wtc_delete_ips() {
         wp_die();
     }
 
-    $ids = isset( $_POST['ids'] ) ? array_map( 'absint', $_POST['ids'] ) : array();
+    $ids = isset( $_POST['ids'] ) ? array_map( 'absint', wp_unslash( $_POST['ids'] ) ) : array();
 
     if ( empty( $ids ) ) {
         wp_send_json_error( 'No IDs provided.' );
@@ -23,17 +23,33 @@ function wtc_delete_ips() {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'wtc_blocked_ips';
-    $placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+    $table_name = esc_sql( $table_name );
 
-    $query = "DELETE FROM {$table_name} WHERE id IN ($placeholders)";
-    $wpdb->query( $wpdb->prepare( $query, $ids ) );
+    // Build the placeholders string, e.g., "%d, %d, %d"
+    $placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
 
-    wp_send_json_success( 'Selected records deleted successfully from the database.' );
-    wp_die();
+    // Build the SQL query
+    $sql = "DELETE FROM {$table_name} WHERE id IN ($placeholders)";
+
+    // Prepare the SQL query by passing parameters individually
+    $args = array_merge( array( $sql ), $ids );
+    $prepared_query = call_user_func_array( array( $wpdb, 'prepare' ), $args );
+
+    // Execute the query
+    $result = $wpdb->query( $prepared_query );
+
+    if ( false === $result ) {
+        // Handle the error
+        wp_send_json_error( 'Database error occurred.' );
+        wp_die();
+    } else {
+        wp_send_json_success( 'Selected records deleted successfully from the database.' );
+        wp_die();
+    }
 }
 add_action( 'wp_ajax_wtc_delete_ips', 'wtc_delete_ips' );
 
-// AJAX handler for deleting IPs from Cloudflare.
+
 // AJAX handler for deleting IPs from Cloudflare.
 function wtc_delete_ips_cloudflare() {
     // Verify the nonce before processing the request.
