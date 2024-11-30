@@ -4,7 +4,7 @@ Tags: Wordfence, Cloudflare, Security, Wordpress Security, Firewall
 Requires at least: 5.2
 Requires PHP: 7.4
 Tested up to: 6.7
-Stable tag: 1.5.3
+Stable tag: 1.5.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -283,24 +283,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Upgrade Notice ==
 
-= 1.5.3 =
+= 1.5.4 =
 
-Added
-Advanced Rule Builder and Evaluation System: Introduced a powerful rule evaluation engine that allows you to create custom security rules based on various criteria such as confidence score, whitelisted status, abusive status, and more. This enables automated decision-making and actions based on incoming traffic data.
-
-Rule Priorities: Implemented a priority system for rules, allowing you to control the order in which rules are evaluated. Higher priority numbers are evaluated first, ensuring critical rules are applied before others.
-
-Automatic Action Application: The plugin now automatically applies actions (e.g., block, challenge) to IP addresses that match your defined rules immediately after capturing traffic data.
-
-Rule Details in Blocked IPs Table: Enhanced the Blocked IPs tab by adding a new column that displays detailed information about the rules that caused each IP address to be blocked, including criteria and actions taken.
-
-Fixed
-Database Schema Updates: Resolved issues with missing database columns (block_mode, rule_id, rule_details) by enhancing the table creation and update process. The plugin now correctly updates existing tables to include new columns without errors.
-
-DataTables Initialization Issue: Fixed an issue where the DataTables plugin was being initialized multiple times, causing reinitialization errors. The plugin now ensures that DataTables are initialized correctly without conflicts.
-
-Rule Evaluation Bug: Addressed a bug where rules were not being evaluated after capturing traffic data. The plugin now properly calls the rule evaluation function, ensuring that your rules are applied as expected.
-
+Plugin re-branded to Proactive Security Suite!
 
 == Changelog ==
 
@@ -451,3 +436,6 @@ DataTables Initialization Issue: Fixed an issue where the DataTables plugin was 
 
 Rule Evaluation Bug: Addressed a bug where rules were not being evaluated after capturing traffic data. The plugin now properly calls the rule evaluation function, ensuring that your rules are applied as expected.
 
+= 1.5.4 =
+
+Plugin re-branded to Proactive Security Suite!

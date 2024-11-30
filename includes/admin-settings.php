@@ -8,7 +8,7 @@ if ( !defined( 'ABSPATH' ) ) {
 require_once WTC_PLUGIN_DIR . 'includes/helpers.php';
 // Add settings link to plugin page.
 function wtc_add_settings_link(  $links  ) {
-    $settings_link = '<a href="' . esc_url( admin_url( 'options-general.php?page=wtc-settings' ) ) . '">' . __( 'Settings', 'blocked-ips-for-wordfence-to-cloudflare' ) . '</a>';
+    $settings_link = '<a href="' . esc_url( admin_url( 'options-general.php?page=pss-settings' ) ) . '">' . __( 'Settings', 'blocked-ips-for-wordfence-to-cloudflare' ) . '</a>';
     array_unshift( $links, $settings_link );
     return $links;
 }
@@ -17,10 +17,10 @@ add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'wtc_add_setti
 // Create the admin menu.
 function wtc_menu() {
     add_options_page(
-        'WTC Settings',
-        'WTC Settings',
+        'PSS Settings',
+        'PSS Settings',
         'manage_options',
-        'wtc-settings',
+        'pss-settings',
         'wtc_render_admin_page'
     );
 }
@@ -31,7 +31,7 @@ function wtc_render_admin_page() {
     if ( !current_user_can( 'manage_options' ) ) {
         wp_die( 'Access is not allowed.' );
     }
-    $active_tab = ( isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'wtc-settings' );
+    $active_tab = ( isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'pss-settings' );
     ?>
     <div class="wrap">
         <h1><?php 
@@ -40,12 +40,12 @@ function wtc_render_admin_page() {
 
         <!-- Add Tabs -->
         <h2 class="nav-tab-wrapper">
-            <a href="?page=wtc-settings" class="nav-tab <?php 
-    echo ( $active_tab === 'wtc-settings' ? 'nav-tab-active' : '' );
+            <a href="?page=pss-settings" class="nav-tab <?php 
+    echo ( $active_tab === 'pss-settings' ? 'nav-tab-active' : '' );
     ?>"><?php 
     esc_html_e( 'Settings', 'blocked-ips-for-wordfence-to-cloudflare' );
     ?></a>
-            <a href="?page=wtc-settings&tab=wtc-ips" class="nav-tab <?php 
+            <a href="?page=pss-settings&tab=wtc-ips" class="nav-tab <?php 
     echo ( $active_tab === 'wtc-ips' ? 'nav-tab-active' : '' );
     ?>"><?php 
     esc_html_e( 'Blocked IPs', 'blocked-ips-for-wordfence-to-cloudflare' );
@@ -357,6 +357,11 @@ function wtc_render_settings_tab() {
     ?>><?php 
     esc_html_e( 'Not Set', 'blocked-ips-for-wordfence-to-cloudflare' );
     ?></option>
+                            <option value="1min" <?php 
+    selected( '1min', $cron_interval );
+    ?>><?php 
+    esc_html_e( 'Every Minute', 'blocked-ips-for-wordfence-to-cloudflare' );
+    ?></option>
                             <option value="5min" <?php 
     selected( '5min', $cron_interval );
     ?>><?php 
@@ -450,7 +455,7 @@ function wtc_handle_delete_captured_traffic_action() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'wtc_traffic_data';
         $wpdb->query( "TRUNCATE TABLE {$table_name}" );
-        $redirect_url = add_query_arg( 'wtc_message', 'deleted', admin_url( 'options-general.php?page=wtc-settings&tab=wtc-traffic' ) );
+        $redirect_url = add_query_arg( 'wtc_message', 'deleted', admin_url( 'options-general.php?page=pss-settings&tab=wtc-traffic' ) );
         wp_safe_redirect( $redirect_url );
         exit;
     }
@@ -462,7 +467,7 @@ function wtc_clear_data() {
     if ( isset( $_POST['wtc_clear_data'] ) && check_admin_referer( 'wtc_clear_data_action', 'wtc_clear_data_nonce' ) ) {
         delete_option( 'wtc_last_processed_time' );
         delete_option( 'wtc_processed_ips_count' );
-        wp_redirect( admin_url( 'options-general.php?page=wtc-settings' ) );
+        wp_redirect( admin_url( 'options-general.php?page=pss-settings' ) );
         exit;
     }
 }
@@ -473,7 +478,7 @@ function wtc_run_process_manually() {
     if ( isset( $_POST['wtc_run_process'] ) && check_admin_referer( 'wtc_run_process_action', 'wtc_run_process_nonce' ) ) {
         wtc_fetch_and_store_blocked_ips();
         wtc_add_ips_to_cloudflare();
-        wp_redirect( admin_url( 'options-general.php?page=wtc-settings' ) );
+        wp_redirect( admin_url( 'options-general.php?page=pss-settings' ) );
         exit;
     }
 }
@@ -532,7 +537,7 @@ function wtc_render_rule_builder_tab() {
             'priority' => $priority,
         ), array('%s', '%s', '%d') );
         // Redirect to avoid resubmission
-        wp_redirect( add_query_arg( 'message', 'rule_added', admin_url( 'options-general.php?page=wtc-settings&tab=wtc-rules' ) ) );
+        wp_redirect( add_query_arg( 'message', 'rule_added', admin_url( 'options-general.php?page=pss-settings&tab=wtc-rules' ) ) );
         exit;
     }
     // Handle deletion of a rule.
@@ -544,7 +549,7 @@ function wtc_render_rule_builder_tab() {
             'id' => $rule_id,
         ), array('%d') );
         // Redirect back to rules page
-        wp_redirect( add_query_arg( 'message', 'rule_deleted', admin_url( 'options-general.php?page=wtc-settings&tab=wtc-rules' ) ) );
+        wp_redirect( add_query_arg( 'message', 'rule_deleted', admin_url( 'options-general.php?page=pss-settings&tab=wtc-rules' ) ) );
         exit;
     }
     // Fetch existing rules.
@@ -626,7 +631,7 @@ function wtc_render_rule_builder_tab() {
             echo esc_url( wp_nonce_url( add_query_arg( array(
                 'action'  => 'delete_rule',
                 'rule_id' => $rule->id,
-            ), admin_url( 'options-general.php?page=wtc-settings&tab=wtc-rules' ) ), 'wtc_delete_rule_nonce' ) );
+            ), admin_url( 'options-general.php?page=pss-settings&tab=wtc-rules' ) ), 'wtc_delete_rule_nonce' ) );
             ?>"><?php 
             esc_html_e( 'Delete', 'blocked-ips-for-wordfence-to-cloudflare' );
             ?></a>

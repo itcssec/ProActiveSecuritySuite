@@ -1,13 +1,13 @@
 <?php
 
 /*
-Plugin Name: Blocked IPs for Wordfence to Cloudflare
-Description: This plugin takes blocked IPs from Wordfence and adds them to the Cloudflare firewall blocked list.
-Version: 1.5.3
+Plugin Name: Proactive Security Suite
+ Description: Enhance your WordPress website’s security with the ProActive Security Suite. This powerful plugin offers advanced security features including automatic IP blocking, an advanced rule builder, traffic analysis, and seamless integration with services like Cloudflare, AbuseIPDB, and Whatismybrowser.com. ProActive Security Suite provides proactive defense mechanisms to protect your site from malicious traffic and potential threats before they reach your server.
+Version: 1.5.4
 Author: ITCS
 Author URI: https://itcs.services/
 License: GPLv2 or later
-Text Domain: blocked-ips-for-wordfence-to-cloudflare
+Text Domain: proactive-security-suite
 */
 // Exit if accessed directly.
 if ( !defined( 'ABSPATH' ) ) {
@@ -22,7 +22,7 @@ if ( !function_exists( 'wor_fs' ) ) {
             require_once dirname( __FILE__ ) . '/freemius/start.php';
             $wor_fs = fs_dynamic_init( array(
                 'id'             => '13207',
-                'slug'           => 'wordfence2cloudflare',
+                'slug'           => 'proactive-security-suite',
                 'type'           => 'plugin',
                 'public_key'     => 'pk_ed1eec939e12cfd4b144c98c2adae',
                 'is_premium'     => false,
@@ -30,7 +30,7 @@ if ( !function_exists( 'wor_fs' ) ) {
                 'has_addons'     => false,
                 'has_paid_plans' => true,
                 'menu'           => array(
-                    'slug'    => 'wtc-settings',
+                    'slug'    => 'pss-settings',
                     'support' => false,
                     'parent'  => array(
                         'slug' => 'options-general.php',
