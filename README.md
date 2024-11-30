@@ -1,9 +1,7 @@
-<body>
-
-<h1>Welcome to the <em>Wordfence to Cloudflare</em> Plugin Wiki</h1>
+<h1>Welcome to the <em>ProActive Security Suite</em> Plugin Wiki</h1>
 
 <p>
-    Enhance your WordPress website's security by seamlessly integrating <strong>Wordfence</strong> with <strong>Cloudflare</strong>. The <em>Wordfence to Cloudflare</em> plugin automates the synchronization of blocked IPs from Wordfence to Cloudflare's firewall, providing an additional layer of protection against malicious traffic.
+    Enhance your WordPress website's security with the <strong>ProActive Security Suite</strong>. This powerful plugin offers advanced security features including automatic IP blocking, an advanced rule builder, traffic analysis, and seamless integration with services like <strong>Cloudflare</strong>, <strong>AbuseIPDB</strong>,  and <strong>Whatismybrowser.com</strong>. ProActive Security Suite provides proactive defense mechanisms to protect your site from malicious traffic and potential threats before they reach your server.
 </p>
 
 <div class="toc">
@@ -19,7 +17,6 @@
         <li><a href="#configuration">Configuration</a></li>
         <ul>
             <li><a href="#cloudflare-settings">Cloudflare Settings</a></li>
-            <li><a href="#wordfence-settings">Wordfence Settings</a></li>
             <li><a href="#abuseipdb-integration">AbuseIPDB Integration</a></li>
             <li><a href="#whatismybrowsercom-integration">WhatIsMyBrowser.com Integration</a></li>
         </ul>
@@ -41,17 +38,17 @@
 <h2 id="introduction">Introduction</h2>
 
 <p>
-    Welcome to the <strong>Wordfence to Cloudflare</strong> plugin! This powerful tool enhances your website's security by combining the strengths of Wordfence and Cloudflare. By automatically synchronizing blocked IPs from Wordfence to Cloudflare's firewall, you can stop malicious traffic before it reaches your server, reducing load and enhancing performance.
+    Welcome to the <strong>ProActive Security Suite</strong> plugin! This comprehensive security solution enhances your website's protection by combining advanced threat detection, automated rule-based actions, and integration with services like <strong>Cloudflare</strong> and <strong>AbuseIPDB</strong>. By proactively analyzing traffic and applying custom security rules, ProActive Security Suite stops malicious traffic before it reaches your server, reducing load and enhancing performance.
 </p>
 
-<a href="https://github.com/itcssec/Wordfence2Cloudflare/releases" class="button">Download Latest Release</a>
+<a href="https://github.com/itcssec/ProActiveSecuritySuite/releases" class="button" target="_blank">Download Latest Release</a>
 
 <h2 id="features">Features</h2>
 
 <h3 id="free-features">Free Features</h3>
 
 <ul>
-    <li><strong>Automatic IP Synchronization:</strong> Effortlessly sync blocked IPs from Wordfence to Cloudflare's firewall.</li>
+    <li><strong>Automatic IP Synchronization:</strong> Effortlessly sync blocked IPs to Cloudflare's firewall.</li>
     <li><strong>Customizable Settings:</strong> Tailor the plugin to your needs with adjustable settings:
         <ul>
             <li>Blocked Hits Threshold</li>
@@ -61,7 +58,7 @@
         </ul>
     </li>
     <li><strong>Manual Synchronization:</strong> Trigger synchronization manually when immediate action is needed.</li>
-    <li><strong>AbuseIPDB Integration:</strong> Optional integration to fetch detailed information about blocked IPs:
+    <li><strong>AbuseIPDB Integration:</strong> Optional integration to fetch detailed information about IPs:
         <ul>
             <li>Country Code</li>
             <li>Usage Type</li>
@@ -92,9 +89,9 @@
 <h2 id="installation">Installation</h2>
 
 <ol>
-    <li><strong>Download the Plugin:</strong> Clone the repository or <a href="https://github.com/itcssec/Wordfence2Cloudflare/releases">download the latest release</a>.</li>
-    <li><strong>Upload to WordPress:</strong> Upload the <code>wordfence-to-cloudflare</code> directory to <code>/wp-content/plugins/</code>.</li>
-    <li><strong>Activate the Plugin:</strong> In your WordPress dashboard, navigate to <em>Plugins</em> and activate <em>Wordfence to Cloudflare</em>.</li>
+    <li><strong>Download the Plugin:</strong> Clone the repository or <a href="https://github.com/itcssec/ProActiveSecuritySuite/releases" target="_blank">download the latest release</a>.</li>
+    <li><strong>Upload to WordPress:</strong> Upload the <code>proactive-security-suite</code> directory to <code>/wp-content/plugins/</code>.</li>
+    <li><strong>Activate the Plugin:</strong> In your WordPress dashboard, navigate to <em>Plugins</em> and activate <em>ProActive Security Suite</em>.</li>
 </ol>
 
 <h2 id="configuration">Configuration</h2>
@@ -112,21 +109,14 @@
     </li>
     <li><strong>Configure Plugin Settings:</strong>
         <ul>
-            <li>Navigate to <em>Settings &gt; WTC Settings</em>.</li>
+            <li>Navigate to <em>Settings &gt; ProActive Security Suite</em>.</li>
             <li>Enter your Cloudflare credentials securely.</li>
             <li>Adjust settings like Blocked Hits Threshold, Block Scope, and Block Mode.</li>
         </ul>
     </li>
 </ol>
 
-<img width="1245" alt="390536737-3bc8f71b-00b7-402c-8a5a-022b72958517" src="https://github.com/user-attachments/assets/2b70c58b-6889-44b6-8f72-377f415b12a2">
-
-
-<h3 id="wordfence-settings">Wordfence Settings</h3>
-
-<p>
-    Ensure Wordfence is installed and actively blocking malicious IPs. No additional configuration is needed within Wordfence for the plugin to function.
-</p>
+<img width="1245" alt="390847194-2b70c58b-6889-44b6-8f72-377f415b12a2" src="https://github.com/user-attachments/assets/f01a1ad4-b708-4c18-9959-9e80891406b9">
 
 <h3 id="abuseipdb-integration">AbuseIPDB Integration</h3>
 
@@ -140,7 +130,7 @@
     </li>
 </ol>
 
-<img width="1242" alt="390537531-689a8d0e-e87b-44af-9e57-79cf111d0724" src="https://github.com/user-attachments/assets/124d8ae7-91ba-4493-afb3-30e19a369a0b">
+<img width="1242" alt="390847364-124d8ae7-91ba-4493-afb3-30e19a369a0b" src="https://github.com/user-attachments/assets/3bf0628e-582f-4a75-9e71-20726cc4c5b6">
 
 
 <h3 id="whatismybrowsercom-integration">WhatIsMyBrowser.com Integration (Premium)</h3>
@@ -160,13 +150,13 @@
 <h3 id="automatic-ip-synchronization">Automatic IP Synchronization</h3>
 
 <p>
-    The plugin automatically syncs blocked IPs based on your configured cron interval. IPs exceeding the Blocked Hits Threshold are added to Cloudflare's firewall.
+    The plugin automatically syncs blocked IPs based on your configured cron interval. IPs exceeding the Blocked Hits Threshold are added to Cloudflare's firewall or acted upon based on your defined rules.
 </p>
 
 <h3 id="manual-synchronization">Manual Synchronization</h3>
 
 <p>
-    Navigate to <em>Settings &gt; WTC Settings</em> and click the <strong>Run Process</strong> button to trigger synchronization immediately.
+    Navigate to <em>Settings &gt; ProActive Security Suite</em> and click the <strong>Run Process</strong> button to trigger synchronization and rule evaluation immediately.
 </p>
 
 <h3 id="captured-traffic-data">Captured Traffic Data (Premium)</h3>
@@ -192,8 +182,7 @@
     Each rule can be assigned an <strong>Action</strong> (e.g., Block, Managed Challenge) that will be applied to IPs matching the rule. You can also assign a <strong>Priority</strong> to control the order in which rules are evaluated.
 </p>
 
-<img width="1240" alt="Screenshot 2024-11-28 at 17 58 01" src="https://github.com/user-attachments/assets/7c3c405b-7a5f-4e86-ad35-f0128c288fcf">
-
+<img width="1240" alt="390848297-7c3c405b-7a5f-4e86-ad35-f0128c288fcf" src="https://github.com/user-attachments/assets/52dcb275-3d70-4ff8-ab8a-3483dc581b94">
 
 <h3 id="rule-details-in-blocked-ips">Rule Details in Blocked IPs (Premium)</h3>
 
@@ -213,10 +202,10 @@
 <h2 id="advanced-settings">Advanced Settings</h2>
 
 <ul>
-    <li><strong>Blocked Hits Threshold:</strong> Define the minimum number of blocked hits before an IP is synchronized.</li>
+    <li><strong>Blocked Hits Threshold:</strong> Define the minimum number of blocked hits before an IP is synchronized or evaluated by rules.</li>
     <li><strong>Block Scope:</strong> Choose between domain-specific or account-wide blocking.</li>
     <li><strong>Block Mode:</strong> Select the action for Cloudflare to take (e.g., Block, Challenge).</li>
-    <li><strong>Cron Interval:</strong> Set how frequently the plugin checks for new blocked IPs.</li>
+    <li><strong>Cron Interval:</strong> Set how frequently the plugin checks for new blocked IPs and evaluates rules.</li>
     <li><strong>Rule Priorities:</strong> Assign priorities to your rules to control the order of evaluation. Higher priority numbers are evaluated first.</li>
     <li><strong>User Role Exclusions:</strong> Exclude specific WordPress user roles from traffic logging and rule evaluation.</li>
 </ul>
@@ -257,7 +246,7 @@
 <h3>Can I see which rule blocked an IP?</h3>
 
 <p>
-    Yes, with the new <strong>Rule Details in Blocked IPs</strong> feature, you can view the exact rule criteria and action that caused an IP to be blocked. This information is displayed in the Blocked IPs tab under the Rule Details column.
+    Yes, with the <strong>Rule Details in Blocked IPs</strong> feature, you can view the exact rule criteria and action that caused an IP to be blocked. This information is displayed in the Blocked IPs tab under the Rule Details column.
 </p>
 
 <h3>How does the automatic action application work?</h3>
@@ -269,7 +258,7 @@
 <h2 id="support">Support and Contribution</h2>
 
 <p>
-    <strong>Support:</strong> For assistance, please open an issue on our <a href="https://github.com/itcssec/Wordfence2Cloudflare/issues">GitHub Issues</a> page or contact us at <a href="mailto:info@itcs.services">info@itcs.services</a>.
+    <strong>Support:</strong> For assistance, please open an issue on our <a href="https://github.com/itcssec/ProActiveSecuritySuite/issues">GitHub Issues</a> page or contact us at <a href="mailto:info@itcs.services">info@itcs.services</a>.
 </p>
 
 <h2 id="license">License</h2>
@@ -281,7 +270,5 @@
 <hr />
 
 <p>
-    <em>Thank you for using Wordfence to Cloudflare!</em> 
+    <em>Thank you for using ProActive Security Suite!</em> 
 </p>
-
-</body>
