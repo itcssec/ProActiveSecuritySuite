@@ -19,7 +19,7 @@ if ( !function_exists( 'wor_fs' ) ) {
         global $wor_fs;
         if ( !isset( $wor_fs ) ) {
             // Include Freemius SDK.
-            require_once dirname( __FILE__ ) . '/freemius/start.php';
+            require_once dirname( __FILE__ ) . '/vendor/freemius/start.php';
             $wor_fs = fs_dynamic_init( array(
                 'id'             => '13207',
                 'slug'           => 'proactive-security-suite',

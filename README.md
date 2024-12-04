@@ -1,4 +1,5 @@
-<h1>Welcome to the <em>ProActive Security Suite</em> Plugin Wiki</h1><img width="120" alt="pss-logo" src="https://github.com/user-attachments/assets/b657ffe7-3010-4e1d-9e83-81eec2bcd552"> 
+<h1>Welcome to the <em>ProActive Security Suite</em> Plugin Wiki</h1>
+
 <p>
     Enhance your WordPress website's security with the <strong>ProActive Security Suite</strong>. This powerful plugin offers advanced security features including automatic IP blocking, an advanced rule builder, traffic analysis, and seamless integration with services like <strong>Cloudflare</strong>, <strong>AbuseIPDB</strong>,  and <strong>Whatismybrowser.com</strong>. ProActive Security Suite provides proactive defense mechanisms to protect your site from malicious traffic and potential threats before they reach your server.
 </p>
