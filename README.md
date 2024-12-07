@@ -1,6 +1,6 @@
 <h1>Welcome to the <em>ProActive Security Suite</em> Plugin Wiki</h1><img width="120" alt="pss-logo" src="https://github.com/user-attachments/assets/b657ffe7-3010-4e1d-9e83-81eec2bcd552"> 
 <p>
-    Enhance your WordPress website's security with the <strong>ProActive Security Suite</strong>. This powerful plugin offers advanced security features including automatic IP blocking, an advanced rule builder, traffic analysis, and seamless integration with services like <strong>Cloudflare</strong>, <strong>AbuseIPDB</strong>,  and <strong>Whatismybrowser.com</strong>. ProActive Security Suite provides proactive defense mechanisms to protect your site from malicious traffic and potential threats before they reach your server.
+    Enhance your WordPress website's security with the <strong>ProActive Security Suite</strong>. This powerful plugin offers advanced security features including automatic IP blocking, an advanced rule builder, traffic analysis, and seamless integration with services like <strong>Cloudflare</strong>, <strong>AbuseIPDB</strong>, <strong>Whatismybrowser.com</strong>, and now <strong>IPData</strong>. ProActive Security Suite provides proactive defense mechanisms to protect your site from malicious traffic and potential threats before they reach your server.
 </p>
 
 <div class="toc">
@@ -18,6 +18,7 @@
             <li><a href="#cloudflare-settings">Cloudflare Settings</a></li>
             <li><a href="#abuseipdb-integration">AbuseIPDB Integration</a></li>
             <li><a href="#whatismybrowsercom-integration">WhatIsMyBrowser.com Integration</a></li>
+            <li><a href="#ipdata-integration">IPData Integration</a></li>
         </ul>
         <li><a href="#usage">Usage</a></li>
         <ul>
@@ -37,7 +38,7 @@
 <h2 id="introduction">Introduction</h2>
 
 <p>
-    Welcome to the <strong>ProActive Security Suite</strong> plugin! This comprehensive security solution enhances your website's protection by combining advanced threat detection, automated rule-based actions, and integration with services like <strong>Cloudflare</strong> and <strong>AbuseIPDB</strong>. By proactively analyzing traffic and applying custom security rules, ProActive Security Suite stops malicious traffic before it reaches your server, reducing load and enhancing performance.
+    Welcome to the <strong>ProActive Security Suite</strong> plugin! This comprehensive security solution enhances your website's protection by combining advanced threat detection, automated rule-based actions, and integrations with services like <strong>Cloudflare</strong>, <strong>AbuseIPDB</strong>, <strong>WhatIsMyBrowser</strong>, and <strong>IPData</strong>. By proactively analyzing traffic and applying custom security rules, ProActive Security Suite stops malicious traffic before it reaches your server, reducing load and enhancing performance.
 </p>
 
 <a href="https://github.com/itcssec/ProActiveSecuritySuite/releases" class="button" target="_blank">Download Latest Release</a>
@@ -70,11 +71,12 @@
 <h3 id="premium-features">Premium Features</h3>
 
 <ul>
-    <li><strong>Advanced Rule Builder:</strong> Create custom security rules based on various criteria such as confidence score, whitelisted status, abusive status, and more. Automate actions like blocking or challenging IPs based on these rules.</li>
+    <li><strong>Advanced Rule Builder:</strong> Create custom security rules based on various criteria such as confidence score, whitelisted status, abusive status, IPData threat status, and more. Automate actions like blocking or challenging IPs based on these rules.</li>
+    <li><strong>IPData Integration:</strong> Fetch threat intelligence from IPData, including tor usage, proxy, known attackers, and other threat indicators. Combine this data with AbuseIPDB and WhatIsMyBrowser data to build comprehensive multi-criteria rules for your traffic.</li>
     <li><strong>Rule Priorities:</strong> Assign priorities to your rules to control the order of evaluation. Higher priority numbers are evaluated first, allowing critical rules to take precedence.</li>
     <li><strong>Automatic Action Application:</strong> The plugin automatically applies actions to IPs that match your defined rules immediately after capturing traffic data.</li>
     <li><strong>Rule Details in Blocked IPs:</strong> View detailed information about which rules caused IPs to be blocked, including criteria and actions taken.</li>
-    <li><strong>Captured Traffic Data:</strong> Log and analyze incoming traffic for enhanced security insights.</li>
+    <li><strong>Captured Traffic Data:</strong> Log and analyze incoming traffic for enhanced security insights, leveraging data from multiple APIs (AbuseIPDB, WhatIsMyBrowser, IPData).</li>
     <li><strong>Exclude User Roles:</strong> Exclude specific WordPress user roles from traffic logging.</li>
     <li><strong>WhatIsMyBrowser.com API Integration:</strong> Advanced user agent analysis and detection capabilities.</li>
     <li><strong>Enhanced AbuseIPDB Integration:</strong> Automatic updates for all entries with the same IP address.</li>
@@ -144,6 +146,38 @@
     </li>
 </ol>
 
+<h3 id="ipdata-integration">IPData Integration (Premium)</h3>
+
+<ol>
+    <li><strong>Obtain API Key:</strong> Sign up at <a href="https://ipdata.co/">IPData</a> for an API key.</li>
+    <li><strong>Enable Integration:</strong>
+        <ul>
+            <li>Enter your IPData API key in the plugin's settings.</li>
+            <li>Enable the <em>IPData Lookup</em> option.</li>
+        </ul>
+    </li>
+</ol>
+
+<p>
+    With IPData integration, the plugin fetches comprehensive threat intelligence for each IP, including indicators like:
+</p>
+
+<ul>
+    <li><strong>Tor</strong></li>
+    <li><strong>iCloud Relay</strong></li>
+    <li><strong>Proxy</strong></li>
+    <li><strong>Datacenter</strong></li>
+    <li><strong>Anonymous User</strong></li>
+    <li><strong>Known Attacker</strong></li>
+    <li><strong>Known Abuser</strong></li>
+    <li><strong>General Threat</strong></li>
+    <li><strong>Bogon</strong></li>
+</ul>
+
+<p>
+    These fields can be combined with AbuseIPDB and WhatIsMyBrowser data in the rule builder. If an IP has previously been queried, subsequent visits reuse the stored IPData information without making additional API requests, ensuring efficient lookups.
+</p>
+
 <h2 id="usage">Usage</h2>
 
 <h3 id="automatic-ip-synchronization">Automatic IP Synchronization</h3>
@@ -161,7 +195,11 @@
 <h3 id="captured-traffic-data">Captured Traffic Data (Premium)</h3>
 
 <p>
-    Access detailed logs under the <em>Captured Traffic Data</em> tab. Analyze user agents, request methods, and more. Exclude specific user roles from logging in the settings.
+    Access detailed logs under the <em>Captured Traffic Data</em> tab. Analyze user agents, request methods, threat intelligence from IPData, and more. Exclude specific user roles from logging in the settings.
+</p>
+
+<p>
+    <strong>Note on Caching:</strong> If full-page caching or a CDN is serving cached responses, some traffic may not be captured because WordPress (and thus this plugin) may not run on every request. Consider adjusting your caching strategy or using a JavaScript-driven approach (e.g., a small script that calls a logged endpoint) if capturing all traffic is critical.
 </p>
 
 <h3 id="advanced-rule-builder">Advanced Rule Builder (Premium)</h3>
@@ -171,17 +209,19 @@
 </p>
 
 <ul>
-    <li><strong>Confidence Score:</strong> Set thresholds using operators like greater than, less than, equal to, etc.</li>
-    <li><strong>Is Whitelisted:</strong> Check if an IP is marked as whitelisted in AbuseIPDB.</li>
-    <li><strong>Is Abusive:</strong> Determine if an IP is associated with abusive behavior.</li>
-    <li><strong>Custom Criteria:</strong> Add other criteria based on the data captured.</li>
-</ul>
+    <li><strong>Confidence Score (AbuseIPDB)</strong></li>
+    <li><strong>Is Whitelisted (AbuseIPDB)</strong></li>
+    <li><strong>Is Abusive (WhatIsMyBrowser)</strong></li>
+    <li><strong>IPData Threat Indicators (Tor, Proxy, Known Attacker, etc.)</strong></li>
+    <li><strong>Custom Criteria:</strong> Combine fields from multiple APIs to create complex, multi-dimensional rules.</li>
+/ul>
 
 <p>
     Each rule can be assigned an <strong>Action</strong> (e.g., Block, Managed Challenge) that will be applied to IPs matching the rule. You can also assign a <strong>Priority</strong> to control the order in which rules are evaluated.
 </p>
 
 <img width="1240" alt="390848297-7c3c405b-7a5f-4e86-ad35-f0128c288fcf" src="https://github.com/user-attachments/assets/52dcb275-3d70-4ff8-ab8a-3483dc581b94">
+<img width="1223" alt="Screenshot 2024-12-07 at 16 00 16" src="https://github.com/user-attachments/assets/4b3e4843-9e56-4249-adc0-cee8c0464aa1">
 
 <h3 id="rule-details-in-blocked-ips">Rule Details in Blocked IPs (Premium)</h3>
 
@@ -190,7 +230,7 @@
 </p>
 
 <ul>
-    <li><strong>Criteria:</strong> The specific conditions that were met, such as confidence score thresholds, whitelisted status, and more.</li>
+    <li><strong>Criteria:</strong> Specific conditions from AbuseIPDB, WhatIsMyBrowser, and IPData threat fields that were met.</li>
     <li><strong>Action:</strong> The action taken by the rule (e.g., Block, Managed Challenge).</li>
 </ul>
 
