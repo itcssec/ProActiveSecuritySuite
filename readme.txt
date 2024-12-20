@@ -4,7 +4,7 @@ Tags: Wordfence, Cloudflare, Security, Wordpress Security, Firewall
 Requires at least: 5.2
 Requires PHP: 7.4
 Tested up to: 6.7
-Stable tag: 1.5.4
+Stable tag: 1.5.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -283,9 +283,14 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Upgrade Notice ==
 
-= 1.5.4 =
+= 1.5.6 =
 
-Plugin re-branded to Proactive Security Suite!
+New Feature: Added support for operating_system and software fields in the Rule Builder. Users can now create rules based on the operating system and browser software detected by WhatIsMyBrowser API.
+Enhancement: Introduced flexible string matching operators (equals, not_equals, contains, not_contains) for operating_system and software fields to allow for more granular rule configurations.
+UI Update: Updated the Rule Builder UI to display new dropdown menus and input fields for operating_system and software criteria.
+Improvement: Ensured that unknown or unexpected values from the WhatIsMyBrowser API can still be handled using string-based matching.
+Maintenance: Minor code refactoring and improved sanitization for input fields in the settings and rule builder sections.
+Compatibility: Confirmed compatibility with the latest WordPress and tested against various common browser user agents.
 
 == Changelog ==
 
@@ -439,3 +444,16 @@ Rule Evaluation Bug: Addressed a bug where rules were not being evaluated after 
 = 1.5.4 =
 
 Plugin re-branded to Proactive Security Suite!
+
+= 1.5.5 =
+
+This version introduces comprehensive integration with the IPData API, empowering you to incorporate detailed threat intelligence fields into your automatic mitigation rules. You can now combine conditions from IPData’s threat data alongside existing criteria from AbuseIPDB and WhatIsMyBrowser, all within a single, unified rule builder. This update ensures even finer-grained control and more robust security actions, helping you stop malicious traffic faster and more precisely than ever before. If you’ve previously set up rules or API keys, double-check your settings and take advantage of these new fields and conditions to enhance your protection.
+
+= 1.5.6 =
+
+New Feature: Added support for operating_system and software fields in the Rule Builder. Users can now create rules based on the operating system and browser software detected by WhatIsMyBrowser API.
+Enhancement: Introduced flexible string matching operators (equals, not_equals, contains, not_contains) for operating_system and software fields to allow for more granular rule configurations.
+UI Update: Updated the Rule Builder UI to display new dropdown menus and input fields for operating_system and software criteria.
+Improvement: Ensured that unknown or unexpected values from the WhatIsMyBrowser API can still be handled using string-based matching.
+Maintenance: Minor code refactoring and improved sanitization for input fields in the settings and rule builder sections.
+Compatibility: Confirmed compatibility with the latest WordPress and tested against various common browser user agents.

@@ -6,7 +6,6 @@ if ( !defined( 'ABSPATH' ) ) {
 }
 // Include the helpers file to ensure wtc_update_cron_schedule() is available.
 require_once WTC_PLUGIN_DIR . 'includes/helpers.php';
-// Add settings link to plugin page.
 function wtc_add_settings_link(  $links  ) {
     $settings_link = '<a href="' . esc_url( admin_url( 'options-general.php?page=pss-settings' ) ) . '">' . __( 'Settings', 'proactive-security-suite' ) . '</a>';
     array_unshift( $links, $settings_link );
@@ -14,7 +13,6 @@ function wtc_add_settings_link(  $links  ) {
 }
 
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'wtc_add_settings_link' );
-// Create the admin menu.
 function wtc_menu() {
     add_options_page(
         'PSS Settings',
@@ -26,7 +24,6 @@ function wtc_menu() {
 }
 
 add_action( 'admin_menu', 'wtc_menu' );
-// Render the admin page.
 function wtc_render_admin_page() {
     if ( !current_user_can( 'manage_options' ) ) {
         wp_die( 'Access is not allowed.' );
@@ -38,7 +35,6 @@ function wtc_render_admin_page() {
     esc_html_e( 'Wordfence to Cloudflare', 'proactive-security-suite' );
     ?></h1>
 
-        <!-- Add Tabs -->
         <h2 class="nav-tab-wrapper">
             <a href="?page=pss-settings" class="nav-tab <?php 
     echo ( $active_tab === 'pss-settings' ? 'nav-tab-active' : '' );
@@ -66,7 +62,6 @@ function wtc_render_admin_page() {
     ?>
         </h2>
 
-        <!-- Display Tab Content -->
         <?php 
     switch ( $active_tab ) {
         case 'wtc-ips':
@@ -74,7 +69,6 @@ function wtc_render_admin_page() {
             break;
         case 'wtc-traffic':
             echo '<div class="notice notice-warning"><p>' . esc_html__( 'The Captured Traffic Data feature is available in the premium version. Please upgrade to access this feature.', 'proactive-security-suite' ) . '</p></div>';
-            // Add an upgrade button
             if ( function_exists( 'wor_fs' ) ) {
                 wor_fs()->get_logger()->warning( 'Attempted access to premium tab: Captured Traffic Data' );
                 wor_fs()->add_upgrade_button();
@@ -82,7 +76,6 @@ function wtc_render_admin_page() {
             break;
         case 'wtc-rules':
             echo '<div class="notice notice-warning"><p>' . esc_html__( 'The Rule Builder feature is available in the premium version. Please upgrade to access this feature.', 'proactive-security-suite' ) . '</p></div>';
-            // Add an upgrade button
             if ( function_exists( 'wor_fs' ) ) {
                 wor_fs()->get_logger()->warning( 'Attempted access to premium tab: Rule Builder' );
                 wor_fs()->add_upgrade_button();
@@ -97,14 +90,11 @@ function wtc_render_admin_page() {
     <?php 
 }
 
-// Render the settings tab.
 function wtc_render_settings_tab() {
     if ( !current_user_can( 'manage_options' ) ) {
         wp_die( 'Access is not allowed.' );
     }
-    // Handle form submission.
     if ( isset( $_POST['wtc_settings_submit'] ) && check_admin_referer( 'wtc_settings_action', 'wtc_settings_nonce' ) ) {
-        // Update options securely.
         $cloudflare_email = sanitize_email( $_POST['cloudflare_email'] );
         $cloudflare_key_input = sanitize_text_field( $_POST['cloudflare_key'] );
         $cloudflare_zone_id = sanitize_text_field( $_POST['cloudflare_zone_id'] );
@@ -116,7 +106,6 @@ function wtc_render_settings_tab() {
         $cron_interval = sanitize_text_field( $_POST['cron_interval'] );
         update_option( 'cloudflare_email', $cloudflare_email );
         if ( !empty( $cloudflare_key_input ) && $cloudflare_key_input !== str_repeat( '*', 10 ) ) {
-            // Securely store the Cloudflare key.
             update_option( 'cloudflare_key', $cloudflare_key_input );
         }
         update_option( 'cloudflare_zone_id', $cloudflare_zone_id );
@@ -124,16 +113,13 @@ function wtc_render_settings_tab() {
         if ( !empty( $abuseipdb_api_id_input ) && $abuseipdb_api_id_input !== str_repeat( '*', 10 ) ) {
             update_option( 'abuseipdb_api_id', $abuseipdb_api_id_input );
         }
-        // Enable AbuseIPDB Lookup Option.
         $wtc_enable_abuseipdb = ( isset( $_POST['wtc_enable_abuseipdb'] ) ? 'yes' : 'no' );
         update_option( 'wtc_enable_abuseipdb', $wtc_enable_abuseipdb );
         update_option( 'blocked_hits_threshold', $blocked_hits_threshold );
         update_option( 'block_scope', $block_scope );
         update_option( 'block_mode', $block_mode );
         update_option( 'cron_interval', $cron_interval );
-        // Update the cron schedule.
         wtc_update_cron_schedule();
-        // Display a success message.
         add_settings_error(
             'wtc_settings',
             'wtc_settings_updated',
@@ -141,7 +127,6 @@ function wtc_render_settings_tab() {
             'updated'
         );
     }
-    // Get options.
     $cloudflare_email = get_option( 'cloudflare_email', '' );
     $cloudflare_key = get_option( 'cloudflare_key', '' );
     $cloudflare_zone_id = get_option( 'cloudflare_zone_id', '' );
@@ -154,16 +139,13 @@ function wtc_render_settings_tab() {
     $cron_interval = get_option( 'cron_interval', 'hourly' );
     $wtc_last_processed_time = get_option( 'wtc_last_processed_time', '' );
     $wtc_processed_ips_count = get_option( 'wtc_processed_ips_count', 0 );
-    // Get the traffic capture setting.
     $wtc_enable_traffic_capture = get_option( 'wtc_enable_traffic_capture', 'yes' );
-    // Get the AbuseIPDB enable setting.
     $wtc_enable_abuseipdb = get_option( 'wtc_enable_abuseipdb', 'no' );
-    // Get the AbuseIPDB lookup for captured traffic setting.
     $wtc_enable_abuseipdb_lookup_traffic = get_option( 'wtc_enable_abuseipdb_lookup_traffic', 'no' );
-    // Get the saved excluded roles.
     $wtc_excluded_roles = get_option( 'wtc_excluded_roles', array() );
-    // Retrieve all editable roles.
     $editable_roles = get_editable_roles();
+    $ipdata_api_id = get_option( 'ipdata_api_id', '' );
+    $wtc_enable_ipdata_lookup_traffic = get_option( 'wtc_enable_ipdata_lookup_traffic', 'no' );
     settings_errors( 'wtc_settings' );
     ?>
     <div class="wrap">
@@ -239,10 +221,8 @@ function wtc_render_settings_tab() {
     ?> /></td>
                 </tr>
 
-                <!-- Premium Features -->
                 <?php 
     ?>
-                    <!-- WhatIsMyBrowser API Key (Disabled) -->
                     <tr valign="top">
                         <th scope="row"><?php 
     esc_html_e( 'WhatIsMyBrowser API Key', 'proactive-security-suite' );
@@ -254,7 +234,6 @@ function wtc_render_settings_tab() {
     ?></p>
                         </td>
                     </tr>
-                    <!-- Enable Traffic Capture (Disabled) -->
                     <tr valign="top">
                         <th scope="row"><?php 
     esc_html_e( 'Enable Traffic Capture', 'proactive-security-suite' );
@@ -266,7 +245,6 @@ function wtc_render_settings_tab() {
     ?></p>
                         </td>
                     </tr>
-                    <!-- Enable AbuseIPDB Lookup for Captured Traffic (Disabled) -->
                     <tr valign="top">
                         <th scope="row"><?php 
     esc_html_e( 'Enable AbuseIPDB Lookup for Captured Traffic', 'proactive-security-suite' );
@@ -278,7 +256,6 @@ function wtc_render_settings_tab() {
     ?></p>
                         </td>
                     </tr>
-                    <!-- Exclude Roles from Captured Traffic (Disabled) -->
                     <tr valign="top">
                         <th scope="row"><?php 
     esc_html_e( 'Exclude Roles from Captured Traffic', 'proactive-security-suite' );
@@ -340,7 +317,6 @@ function wtc_render_settings_tab() {
     ?>><?php 
     esc_html_e( 'Managed Challenge', 'proactive-security-suite' );
     ?></option>
-                            <!-- Add other modes as needed -->
                         </select>
                     </td>
                 </tr>
@@ -387,7 +363,6 @@ function wtc_render_settings_tab() {
                 </tr>
             </table>
 
-            <!-- Cron Status -->
             <h2><?php 
     esc_html_e( 'Cron Status', 'proactive-security-suite' );
     ?></h2>
@@ -415,7 +390,6 @@ function wtc_render_settings_tab() {
     ?>
         </form>
 
-        <!-- Run Process Manually -->
         <form method="post" action="<?php 
     echo esc_url( admin_url( 'admin-post.php?action=wtc_run_process' ) );
     ?>">
@@ -427,7 +401,6 @@ function wtc_render_settings_tab() {
     ?></button>
         </form>
 
-        <!-- Clear Data -->
         <br><br>
         <form method="post" action="<?php 
     echo esc_url( admin_url( 'admin-post.php' ) );
@@ -441,7 +414,6 @@ function wtc_render_settings_tab() {
     ?></button>
         </form>
 
-        <!-- Delete Captured Traffic (Premium Only) -->
         <?php 
     ?>
     </div>
@@ -462,7 +434,6 @@ function wtc_handle_delete_captured_traffic_action() {
 }
 
 add_action( 'admin_post_wtc_delete_captured_traffic', 'wtc_handle_delete_captured_traffic_action' );
-// Clear data handler.
 function wtc_clear_data() {
     if ( isset( $_POST['wtc_clear_data'] ) && check_admin_referer( 'wtc_clear_data_action', 'wtc_clear_data_nonce' ) ) {
         delete_option( 'wtc_last_processed_time' );
@@ -473,7 +444,6 @@ function wtc_clear_data() {
 }
 
 add_action( 'admin_post_wtc_clear_data', 'wtc_clear_data' );
-// Run process manually handler.
 function wtc_run_process_manually() {
     if ( isset( $_POST['wtc_run_process'] ) && check_admin_referer( 'wtc_run_process_action', 'wtc_run_process_nonce' ) ) {
         wtc_fetch_and_store_blocked_ips();
@@ -484,7 +454,6 @@ function wtc_run_process_manually() {
 }
 
 add_action( 'admin_post_wtc_run_process', 'wtc_run_process_manually' );
-// Add CSS for disabled tabs and inputs.
 function wtc_admin_styles() {
     echo '<style>
     .nav-tab.disabled {
@@ -500,16 +469,15 @@ function wtc_admin_styles() {
 }
 
 add_action( 'admin_head', 'wtc_admin_styles' );
-// Render the Rule Builder tab.
 function wtc_render_rule_builder_tab() {
     if ( !current_user_can( 'manage_options' ) ) {
         wp_die( 'Access is not allowed.' );
     }
     // Handle form submission for adding a new rule.
     if ( isset( $_POST['wtc_add_rule_nonce'] ) && check_admin_referer( 'wtc_add_rule_action', 'wtc_add_rule_nonce' ) ) {
-        // Validate and sanitize inputs
         $criteria = array();
-        if ( !empty( $_POST['confidence_score_operator'] ) && isset( $_POST['confidence_score_value'] ) ) {
+        // Confidence Score
+        if ( !empty( $_POST['confidence_score_operator'] ) && isset( $_POST['confidence_score_value'] ) && $_POST['confidence_score_value'] !== '' ) {
             $operator = sanitize_text_field( $_POST['confidence_score_operator'] );
             $value = intval( $_POST['confidence_score_value'] );
             $criteria['confidence_score'] = array(
@@ -517,18 +485,51 @@ function wtc_render_rule_builder_tab() {
                 'value'    => $value,
             );
         }
+        // is_whitelisted
         if ( isset( $_POST['is_whitelisted'] ) && $_POST['is_whitelisted'] !== '' ) {
-            $is_whitelisted = sanitize_text_field( $_POST['is_whitelisted'] );
-            $criteria['is_whitelisted'] = $is_whitelisted;
+            $criteria['is_whitelisted'] = sanitize_text_field( $_POST['is_whitelisted'] );
         }
+        // is_abusive
         if ( isset( $_POST['is_abusive'] ) && $_POST['is_abusive'] !== '' ) {
-            $is_abusive = sanitize_text_field( $_POST['is_abusive'] );
-            $criteria['is_abusive'] = $is_abusive;
+            $criteria['is_abusive'] = sanitize_text_field( $_POST['is_abusive'] );
         }
-        // Add other criteria as needed
+        // operating_system
+        if ( isset( $_POST['operating_system_operator'] ) && isset( $_POST['operating_system_value'] ) && $_POST['operating_system_value'] !== '' ) {
+            $op = sanitize_text_field( $_POST['operating_system_operator'] );
+            $val = sanitize_text_field( $_POST['operating_system_value'] );
+            $criteria['operating_system'] = array(
+                'operator' => $op,
+                'value'    => $val,
+            );
+        }
+        // software
+        if ( isset( $_POST['software_operator'] ) && isset( $_POST['software_value'] ) && $_POST['software_value'] !== '' ) {
+            $op = sanitize_text_field( $_POST['software_operator'] );
+            $val = sanitize_text_field( $_POST['software_value'] );
+            $criteria['software'] = array(
+                'operator' => $op,
+                'value'    => $val,
+            );
+        }
+        // IPData Threat fields
+        $threat_fields = array(
+            'ipdata_is_tor',
+            'ipdata_is_icloud_relay',
+            'ipdata_is_proxy',
+            'ipdata_is_datacenter',
+            'ipdata_is_anonymous',
+            'ipdata_is_known_attacker',
+            'ipdata_is_known_abuser',
+            'ipdata_is_threat',
+            'ipdata_is_bogon'
+        );
+        foreach ( $threat_fields as $field ) {
+            if ( isset( $_POST[$field] ) && $_POST[$field] !== '' ) {
+                $criteria[$field] = sanitize_text_field( $_POST[$field] );
+            }
+        }
         $action = sanitize_text_field( $_POST['action'] );
         $priority = intval( $_POST['priority'] );
-        // Insert the rule into the database
         global $wpdb;
         $rules_table = $wpdb->prefix . 'wtc_rules';
         $wpdb->insert( $rules_table, array(
@@ -536,7 +537,6 @@ function wtc_render_rule_builder_tab() {
             'action'   => $action,
             'priority' => $priority,
         ), array('%s', '%s', '%d') );
-        // Redirect to avoid resubmission
         wp_redirect( add_query_arg( 'message', 'rule_added', admin_url( 'options-general.php?page=pss-settings&tab=wtc-rules' ) ) );
         exit;
     }
@@ -548,15 +548,12 @@ function wtc_render_rule_builder_tab() {
         $wpdb->delete( $rules_table, array(
             'id' => $rule_id,
         ), array('%d') );
-        // Redirect back to rules page
         wp_redirect( add_query_arg( 'message', 'rule_deleted', admin_url( 'options-general.php?page=pss-settings&tab=wtc-rules' ) ) );
         exit;
     }
-    // Fetch existing rules.
     global $wpdb;
     $rules_table = $wpdb->prefix . 'wtc_rules';
     $rules = $wpdb->get_results( "SELECT * FROM {$rules_table} ORDER BY priority DESC" );
-    // Display any messages.
     if ( isset( $_GET['message'] ) ) {
         if ( $_GET['message'] === 'rule_added' ) {
             echo '<div class="notice notice-success"><p>' . esc_html__( 'Rule added successfully.', 'proactive-security-suite' ) . '</p></div>';
@@ -568,15 +565,12 @@ function wtc_render_rule_builder_tab() {
     <h2><?php 
     esc_html_e( 'Rule Builder', 'proactive-security-suite' );
     ?></h2>
-
-    <!-- Disclaimer -->
     <div class="notice notice-warning">
         <p><?php 
     esc_html_e( 'Please use automatic mitigation rules with caution. Misconfigured rules may block legitimate traffic, including known bots. Always ensure that "isWhitelisted" is set to "false" when creating rules based on confidence scores.', 'proactive-security-suite' );
     ?></p>
     </div>
 
-    <!-- Existing Rules Table -->
     <table class="wp-list-table widefat fixed striped">
         <thead>
             <tr>
@@ -600,8 +594,6 @@ function wtc_render_rule_builder_tab() {
         ?>
                 <?php 
         foreach ( $rules as $rule ) {
-            ?>
-                    <?php 
             $criteria = json_decode( $rule->criteria, true );
             ?>
                     <tr>
@@ -610,7 +602,6 @@ function wtc_render_rule_builder_tab() {
             ?></td>
                         <td>
                             <?php 
-            // Display criteria in a readable format
             foreach ( $criteria as $key => $value ) {
                 echo esc_html( ucfirst( str_replace( '_', ' ', $key ) ) ) . ': ';
                 if ( is_array( $value ) ) {
@@ -626,7 +617,6 @@ function wtc_render_rule_builder_tab() {
             echo esc_html( ucfirst( str_replace( '_', ' ', $rule->action ) ) );
             ?></td>
                         <td>
-                            <!-- Delete Button -->
                             <a href="<?php 
             echo esc_url( wp_nonce_url( add_query_arg( array(
                 'action'  => 'delete_rule',
@@ -654,7 +644,6 @@ function wtc_render_rule_builder_tab() {
         </tbody>
     </table>
 
-    <!-- Add New Rule Form -->
     <h3><?php 
     esc_html_e( 'Add New Rule', 'proactive-security-suite' );
     ?></h3>
@@ -663,13 +652,16 @@ function wtc_render_rule_builder_tab() {
     wp_nonce_field( 'wtc_add_rule_action', 'wtc_add_rule_nonce' );
     ?>
         <table class="form-table">
-            <!-- Confidence Score Criteria -->
+            <!-- Confidence Score -->
             <tr valign="top">
                 <th scope="row"><?php 
     esc_html_e( 'Confidence Score', 'proactive-security-suite' );
     ?></th>
                 <td>
                     <select name="confidence_score_operator">
+                        <option value=""><?php 
+    esc_html_e( 'No Condition', 'proactive-security-suite' );
+    ?></option>
                         <option value=">"><?php 
     esc_html_e( '>', 'proactive-security-suite' );
     ?></option>
@@ -689,7 +681,7 @@ function wtc_render_rule_builder_tab() {
                     <input type="number" name="confidence_score_value" min="0" max="100" />
                 </td>
             </tr>
-            <!-- isWhitelisted Criteria -->
+            <!-- is_whitelisted -->
             <tr valign="top">
                 <th scope="row"><?php 
     esc_html_e( 'Is Whitelisted', 'proactive-security-suite' );
@@ -708,7 +700,7 @@ function wtc_render_rule_builder_tab() {
                     </select>
                 </td>
             </tr>
-            <!-- is_abusive Criteria -->
+            <!-- is_abusive -->
             <tr valign="top">
                 <th scope="row"><?php 
     esc_html_e( 'Is Abusive', 'proactive-security-suite' );
@@ -727,6 +719,98 @@ function wtc_render_rule_builder_tab() {
                     </select>
                 </td>
             </tr>
+            <!-- operating_system -->
+            <tr valign="top">
+                <th scope="row"><?php 
+    esc_html_e( 'Operating System', 'proactive-security-suite' );
+    ?></th>
+                <td>
+                    <select name="operating_system_operator">
+                        <option value=""><?php 
+    esc_html_e( 'No Condition', 'proactive-security-suite' );
+    ?></option>
+                        <option value="equals"><?php 
+    esc_html_e( 'Equals', 'proactive-security-suite' );
+    ?></option>
+                        <option value="not_equals"><?php 
+    esc_html_e( 'Not Equals', 'proactive-security-suite' );
+    ?></option>
+                        <option value="contains"><?php 
+    esc_html_e( 'Contains', 'proactive-security-suite' );
+    ?></option>
+                        <option value="not_contains"><?php 
+    esc_html_e( 'Does Not Contain', 'proactive-security-suite' );
+    ?></option>
+                    </select>
+                    <input type="text" name="operating_system_value" />
+                </td>
+            </tr>
+            <!-- software -->
+            <tr valign="top">
+                <th scope="row"><?php 
+    esc_html_e( 'Software (Browser)', 'proactive-security-suite' );
+    ?></th>
+                <td>
+                    <select name="software_operator">
+                        <option value=""><?php 
+    esc_html_e( 'No Condition', 'proactive-security-suite' );
+    ?></option>
+                        <option value="equals"><?php 
+    esc_html_e( 'Equals', 'proactive-security-suite' );
+    ?></option>
+                        <option value="not_equals"><?php 
+    esc_html_e( 'Not Equals', 'proactive-security-suite' );
+    ?></option>
+                        <option value="contains"><?php 
+    esc_html_e( 'Contains', 'proactive-security-suite' );
+    ?></option>
+                        <option value="not_contains"><?php 
+    esc_html_e( 'Does Not Contain', 'proactive-security-suite' );
+    ?></option>
+                    </select>
+                    <input type="text" name="software_value" />
+                </td>
+            </tr>
+
+            <!-- IPData Threat fields -->
+            <?php 
+    $ipdata_threat_fields = array(
+        'ipdata_is_tor'            => 'IPData Is Tor',
+        'ipdata_is_icloud_relay'   => 'IPData Is iCloud Relay',
+        'ipdata_is_proxy'          => 'IPData Is Proxy',
+        'ipdata_is_datacenter'     => 'IPData Is Datacenter',
+        'ipdata_is_anonymous'      => 'IPData Is Anonymous',
+        'ipdata_is_known_attacker' => 'IPData Is Known Attacker',
+        'ipdata_is_known_abuser'   => 'IPData Is Known Abuser',
+        'ipdata_is_threat'         => 'IPData Is Threat',
+        'ipdata_is_bogon'          => 'IPData Is Bogon',
+    );
+    foreach ( $ipdata_threat_fields as $field => $label ) {
+        ?>
+                <tr valign="top">
+                    <th scope="row"><?php 
+        echo esc_html( $label );
+        ?></th>
+                    <td>
+                        <select name="<?php 
+        echo esc_attr( $field );
+        ?>">
+                            <option value=""><?php 
+        esc_html_e( 'Any', 'proactive-security-suite' );
+        ?></option>
+                            <option value="true"><?php 
+        esc_html_e( 'True', 'proactive-security-suite' );
+        ?></option>
+                            <option value="false"><?php 
+        esc_html_e( 'False', 'proactive-security-suite' );
+        ?></option>
+                        </select>
+                    </td>
+                </tr>
+            <?php 
+    }
+    ?>
+
             <!-- Action -->
             <tr valign="top">
                 <th scope="row"><?php 
@@ -740,10 +824,10 @@ function wtc_render_rule_builder_tab() {
                         <option value="managed_challenge"><?php 
     esc_html_e( 'Managed Challenge', 'proactive-security-suite' );
     ?></option>
-                        <!-- Add other actions as needed -->
                     </select>
                 </td>
             </tr>
+
             <!-- Priority -->
             <tr valign="top">
                 <th scope="row"><?php 
