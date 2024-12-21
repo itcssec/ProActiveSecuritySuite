@@ -1,4 +1,5 @@
-<h1>Welcome to the <em>ProActive Security Suite</em> Plugin Wiki</h1><img width="120" alt="pss-logo" src="https://github.com/user-attachments/assets/b657ffe7-3010-4e1d-9e83-81eec2bcd552"> 
+<h1>Welcome to the <em>ProActive Security Suite</em> Plugin Wiki</h1>
+<img width="120" alt="pss-logo" src="https://github.com/user-attachments/assets/b657ffe7-3010-4e1d-9e83-81eec2bcd552"> 
 <p>
     Enhance your WordPress website's security with the <strong>ProActive Security Suite</strong>. This powerful plugin offers advanced security features including automatic IP blocking, an advanced rule builder, traffic analysis, and seamless integration with services like <strong>Cloudflare</strong>, <strong>AbuseIPDB</strong>, <strong>Whatismybrowser.com</strong>, and now <strong>IPData</strong>. ProActive Security Suite provides proactive defense mechanisms to protect your site from malicious traffic and potential threats before they reach your server.
 </p>
@@ -81,6 +82,14 @@
     <li><strong>WhatIsMyBrowser.com API Integration:</strong> Advanced user agent analysis and detection capabilities.</li>
     <li><strong>Enhanced AbuseIPDB Integration:</strong> Automatic updates for all entries with the same IP address.</li>
     <li><strong>Priority Support:</strong> Access dedicated support for assistance and troubleshooting.</li>
+    <li><strong>NEW - Traffic Insights:</strong> View your traffic at a glance by aggregating and displaying each IP address only once. This tab provides:
+        <ul>
+            <li><em>Aggregated IP Overview:</em> See first/last seen timestamps, total requests, and threat data from IPData in a single row per IP.</li>
+            <li><em>Operating System & Browser Details:</em> Includes the most recent OS and software information from WhatIsMyBrowser.</li>
+            <li><em>User Agent:</em> Quickly review the last user agent encountered for each IP.</li>
+            <li><em>Professional Statistics:</em> Real-time stats on total unique IPs, average confidence scores, top countries, and more, all on one page.</li>
+        </ul>
+    </li>
 </ul>
 
 <div class="note">
@@ -214,7 +223,7 @@
     <li><strong>Is Abusive (WhatIsMyBrowser)</strong></li>
     <li><strong>IPData Threat Indicators (Tor, Proxy, Known Attacker, etc.)</strong></li>
     <li><strong>Custom Criteria:</strong> Combine fields from multiple APIs to create complex, multi-dimensional rules.</li>
-/ul>
+</ul>
 
 <p>
     Each rule can be assigned an <strong>Action</strong> (e.g., Block, Managed Challenge) that will be applied to IPs matching the rule. You can also assign a <strong>Priority</strong> to control the order in which rules are evaluated.
