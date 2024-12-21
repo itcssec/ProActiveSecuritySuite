@@ -24,6 +24,9 @@ function wtc_menu() {
 }
 
 add_action( 'admin_menu', 'wtc_menu' );
+/**
+ * Main admin page router.
+ */
 function wtc_render_admin_page() {
     if ( !current_user_can( 'manage_options' ) ) {
         wp_die( 'Access is not allowed.' );
@@ -36,28 +39,40 @@ function wtc_render_admin_page() {
     ?></h1>
 
         <h2 class="nav-tab-wrapper">
-            <a href="?page=pss-settings" class="nav-tab <?php 
+            <a href="?page=pss-settings"
+               class="nav-tab <?php 
     echo ( $active_tab === 'pss-settings' ? 'nav-tab-active' : '' );
-    ?>"><?php 
+    ?>">
+               <?php 
     esc_html_e( 'Settings', 'proactive-security-suite' );
-    ?></a>
-            <a href="?page=pss-settings&tab=wtc-ips" class="nav-tab <?php 
+    ?>
+            </a>
+            <a href="?page=pss-settings&tab=wtc-ips"
+               class="nav-tab <?php 
     echo ( $active_tab === 'wtc-ips' ? 'nav-tab-active' : '' );
-    ?>"><?php 
+    ?>">
+               <?php 
     esc_html_e( 'Blocked IPs', 'proactive-security-suite' );
-    ?></a>
+    ?>
+            </a>
+
             <?php 
     ?>
-                <a href="#" class="nav-tab disabled"><?php 
-    esc_html_e( 'Captured Traffic Data', 'proactive-security-suite' );
-    ?> <?php 
-    esc_html_e( '(Premium)', 'proactive-security-suite' );
-    ?></a>
-                <a href="#" class="nav-tab disabled"><?php 
-    esc_html_e( 'Rule Builder', 'proactive-security-suite' );
-    ?> <?php 
-    esc_html_e( '(Premium)', 'proactive-security-suite' );
-    ?></a>
+                <a href="#" class="nav-tab disabled">
+                    <?php 
+    esc_html_e( 'Captured Traffic Data (Premium)', 'proactive-security-suite' );
+    ?>
+                </a>
+                <a href="#" class="nav-tab disabled">
+                    <?php 
+    esc_html_e( 'Rule Builder (Premium)', 'proactive-security-suite' );
+    ?>
+                </a>
+                <a href="#" class="nav-tab disabled">
+                    <?php 
+    esc_html_e( 'Traffic Insights (Premium)', 'proactive-security-suite' );
+    ?>
+                </a>
             <?php 
     ?>
         </h2>
@@ -81,6 +96,13 @@ function wtc_render_admin_page() {
                 wor_fs()->add_upgrade_button();
             }
             break;
+        case 'wtc-insights':
+            echo '<div class="notice notice-warning"><p>' . esc_html__( 'Traffic Insights is available in the premium version. Please upgrade to access this feature.', 'proactive-security-suite' ) . '</p></div>';
+            if ( function_exists( 'wor_fs' ) ) {
+                wor_fs()->get_logger()->warning( 'Attempted access to premium tab: Traffic Insights' );
+                wor_fs()->add_upgrade_button();
+            }
+            break;
         default:
             wtc_render_settings_tab();
             break;
@@ -88,6 +110,20 @@ function wtc_render_admin_page() {
     ?>
     </div>
     <?php 
+}
+
+/**
+ * Renders the new premium-only "Traffic Insights" tab
+ * which shows unique IPs and stats.
+ */
+function wtc_render_traffic_insights_tab() {
+    // We delegate the rendering to our new class to keep things clean.
+    if ( class_exists( 'WTC_Traffic_Insights' ) ) {
+        WTC_Traffic_Insights::render_insights_page();
+    } else {
+        // Fallback if the class isn't loaded
+        echo '<div class="notice notice-error"><p>' . esc_html__( 'Traffic Insights class is not available.', 'proactive-security-suite' ) . '</p></div>';
+    }
 }
 
 function wtc_render_settings_tab() {

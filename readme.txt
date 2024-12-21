@@ -4,7 +4,7 @@ Tags: Wordfence, Cloudflare, Security, Wordpress Security, Firewall
 Requires at least: 5.2
 Requires PHP: 7.4
 Tested up to: 6.7
-Stable tag: 1.5.6
+Stable tag: 1.5.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -283,14 +283,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Upgrade Notice ==
 
-= 1.5.6 =
+= 1.5.7 =
 
-New Feature: Added support for operating_system and software fields in the Rule Builder. Users can now create rules based on the operating system and browser software detected by WhatIsMyBrowser API.
-Enhancement: Introduced flexible string matching operators (equals, not_equals, contains, not_contains) for operating_system and software fields to allow for more granular rule configurations.
-UI Update: Updated the Rule Builder UI to display new dropdown menus and input fields for operating_system and software criteria.
-Improvement: Ensured that unknown or unexpected values from the WhatIsMyBrowser API can still be handled using string-based matching.
-Maintenance: Minor code refactoring and improved sanitization for input fields in the settings and rule builder sections.
-Compatibility: Confirmed compatibility with the latest WordPress and tested against various common browser user agents.
+Introducing Traffic Insights, our newest premium feature that provides a single-page overview of unique IP addresses in your captured traffic. Analyze threat intelligence fields from IPData (Tor, Proxy, Known Attacker/Abuser, etc.) alongside the latest OS, browser software, and user agent details from WhatIsMyBrowser. Gain valuable statistics like total unique IPs, top countries, average confidence scores, and more—all from one intuitive dashboard. Upgrade to unlock this powerful tool and enhance your site’s proactive security strategy today!
 
 == Changelog ==
 
@@ -457,3 +452,7 @@ UI Update: Updated the Rule Builder UI to display new dropdown menus and input f
 Improvement: Ensured that unknown or unexpected values from the WhatIsMyBrowser API can still be handled using string-based matching.
 Maintenance: Minor code refactoring and improved sanitization for input fields in the settings and rule builder sections.
 Compatibility: Confirmed compatibility with the latest WordPress and tested against various common browser user agents.
+
+= 1.5.7 =
+
+Introducing Traffic Insights, our newest premium feature that provides a single-page overview of unique IP addresses in your captured traffic. Analyze threat intelligence fields from IPData (Tor, Proxy, Known Attacker/Abuser, etc.) alongside the latest OS, browser software, and user agent details from WhatIsMyBrowser. Gain valuable statistics like total unique IPs, top countries, average confidence scores, and more—all from one intuitive dashboard. Upgrade to unlock this powerful tool and enhance your site’s proactive security strategy today!
