@@ -91,6 +91,7 @@
         </ul>
     </li>
 </ul>
+<img width="1163" alt="Screenshot 2024-12-21 at 14 28 25" src="https://github.com/user-attachments/assets/80ed56ce-cc95-441e-8490-6927153ffe9f" />
 
 <div class="note">
     <strong>Note:</strong> The premium features require an active premium license. Upgrade to access these advanced functionalities.
