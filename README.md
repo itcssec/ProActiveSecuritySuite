@@ -304,6 +304,32 @@
     When traffic data is captured, the plugin immediately evaluates it against your defined rules. If a rule matches, the specified action is applied to the IP address without any manual intervention.
 </p>
 
+<h2 id="support">External Services</h2>
+
+<p>
+**Cloudflare**  
+- **Usage**: We send visitor IPs (and optionally country/ISP data) to create Firewall rules.  
+- **Data Sent**: IP address, associated rule details.  
+- [Cloudflare Terms of Service](https://www.cloudflare.com/terms/) | [Cloudflare Privacy Policy](https://www.cloudflare.com/privacypolicy/)
+
+**AbuseIPDB**  
+- **Usage**: We check IP reputation, fetching country code, ISP, and confidence score.  
+- **Data Sent**: IP address.  
+- [AbuseIPDB Terms of Service](https://www.abuseipdb.com/terms.html) | [Privacy Policy](https://www.abuseipdb.com/privacy.html)
+
+**WhatIsMyBrowser**  
+- **Usage**: We send user agent strings to detect software (browser), OS, and if it’s abusive.  
+- **Data Sent**: User agent strings.  
+- [WhatIsMyBrowser Terms of Service](https://developers.whatismybrowser.com/api/terms/) |
+  [Privacy Policy](https://developers.whatismybrowser.com/api/privacy-policy)
+
+**IPData**  
+- **Usage**: We fetch detailed threat intelligence (Tor, proxy, known attacker, etc.).  
+- **Data Sent**: IP address.  
+- [IPData Terms](https://ipdata.co/terms-of-service.html) |
+  [Privacy Policy](https://ipdata.co/privacy.html)
+</p>
+
 <h2 id="support">Support and Contribution</h2>
 
 <p>

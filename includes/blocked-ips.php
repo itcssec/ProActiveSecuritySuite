@@ -5,11 +5,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Fetch blocked IPs from Wordfence and store in custom table.
-function wtc_fetch_and_store_blocked_ips() {
-    error_log( 'wtc_fetch_and_store_blocked_ips() called at ' . current_time( 'mysql' ) );
+function pssx_fetch_and_store_blocked_ips() {
+    error_log( 'pssx_fetch_and_store_blocked_ips() called at ' . current_time( 'mysql' ) );
 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'wtc_blocked_ips';
+    $table_name = $wpdb->prefix . 'pssx_blocked_ips';
     $threshold  = intval( get_option( 'blocked_hits_threshold', 0 ) );
 
     $blocked_ips = $wpdb->get_results(
@@ -78,11 +78,11 @@ function wtc_fetch_and_store_blocked_ips() {
 
 // Add the blocked IPs to Cloudflare.
 // Add the blocked IPs to Cloudflare.
-function wtc_add_ips_to_cloudflare() {
-    error_log( 'wtc_add_ips_to_cloudflare() called at ' . current_time( 'mysql' ) );
+function pssx_add_ips_to_cloudflare() {
+    error_log( 'pssx_add_ips_to_cloudflare() called at ' . current_time( 'mysql' ) );
 
     global $wpdb;
-    $table_name      = $wpdb->prefix . 'wtc_blocked_ips';
+    $table_name      = $wpdb->prefix . 'pssx_blocked_ips';
     $email           = get_option( 'cloudflare_email' );
     $key             = get_option( 'cloudflare_key' );
     $block_scope     = get_option( 'block_scope', 'domain' );
@@ -91,7 +91,7 @@ function wtc_add_ips_to_cloudflare() {
     $account_id      = get_option( 'cloudflare_account_id' );
     $ips_to_send     = $wpdb->get_results( "SELECT * FROM $table_name WHERE isSent = 0" );
 
-    $wtc_enable_abuseipdb = get_option( 'wtc_enable_abuseipdb', 'no' );
+    $pssx_enable_abuseipdb = get_option( 'pssx_enable_abuseipdb', 'no' );
     $abuseipdb_api_key = get_option( 'abuseipdb_api_id', '' );
 
     $processed_ips_count = 0; // Initialize counter
@@ -102,7 +102,7 @@ function wtc_add_ips_to_cloudflare() {
             $block_mode = $ip->block_mode;
 
             // Perform AbuseIPDB lookup if enabled
-            if ( $wtc_enable_abuseipdb == 'yes' && ! empty( $abuseipdb_api_key ) ) {
+            if ( $pssx_enable_abuseipdb == 'yes' && ! empty( $abuseipdb_api_key ) ) {
                 // Perform the lookup
                 $request_url = 'https://api.abuseipdb.com/api/v2/check';
 
@@ -189,7 +189,7 @@ function wtc_add_ips_to_cloudflare() {
                 $responseMessage = $error['message'];
 
                 if ( $responseCode == '10009' && $responseMessage == 'firewallaccessrules.api.duplicate_of_existing' ) {
-                    wtc_update_cloudflare_response( $ip->id, wp_remote_retrieve_body( $response ) );
+                    pssx_update_cloudflare_response( $ip->id, wp_remote_retrieve_body( $response ) );
                     $wpdb->update(
                         $table_name,
                         array( 'isSent' => 1 ),
@@ -205,7 +205,7 @@ function wtc_add_ips_to_cloudflare() {
                 }
             }
 
-            wtc_update_cloudflare_response( $ip->id, wp_remote_retrieve_body( $response ) );
+            pssx_update_cloudflare_response( $ip->id, wp_remote_retrieve_body( $response ) );
 
             // Mark IP as sent.
             $wpdb->update(
@@ -221,17 +221,17 @@ function wtc_add_ips_to_cloudflare() {
     }
 
     // Update the options after processing
-    update_option( 'wtc_last_processed_time', current_time( 'mysql' ) );
-    update_option( 'wtc_processed_ips_count', $processed_ips_count );
+    update_option( 'pssx_last_processed_time', current_time( 'mysql' ) );
+    update_option( 'pssx_processed_ips_count', $processed_ips_count );
 
-    error_log( 'wtc_add_ips_to_cloudflare() completed. Processed IPs: ' . $processed_ips_count );
+    error_log( 'pssx_add_ips_to_cloudflare() completed. Processed IPs: ' . $processed_ips_count );
 }
 
 
 // Update Cloudflare response in the custom table.
-function wtc_update_cloudflare_response( $ip_id, $cf_response ) {
+function pssx_update_cloudflare_response( $ip_id, $cf_response ) {
     global $wpdb;
-    $table_name = $wpdb->prefix . 'wtc_blocked_ips';
+    $table_name = $wpdb->prefix . 'pssx_blocked_ips';
 
     $wpdb->update(
         $table_name,
@@ -247,17 +247,17 @@ function wtc_update_cloudflare_response( $ip_id, $cf_response ) {
 }
 
 // Hook the functions to the custom cron action.
-add_action( 'wtc_check_new_blocked_ips', 'wtc_fetch_and_store_blocked_ips' );
-add_action( 'wtc_check_new_blocked_ips', 'wtc_add_ips_to_cloudflare' );
+add_action( 'pssx_check_new_blocked_ips', 'pssx_fetch_and_store_blocked_ips' );
+add_action( 'pssx_check_new_blocked_ips', 'pssx_add_ips_to_cloudflare' );
 
 // Render Blocked IPs Tab Content.
-function wtc_render_ips_tab() {
+function pssx_render_ips_tab() {
     if ( ! current_user_can( 'manage_options' ) ) {
         wp_die( 'Access is not allowed.' );
     }
 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'wtc_blocked_ips';
+    $table_name = $wpdb->prefix . 'pssx_blocked_ips';
 
     // Fetch all blocked IPs
     $ips = $wpdb->get_results( "SELECT * FROM $table_name" );
@@ -273,11 +273,11 @@ function wtc_render_ips_tab() {
 
     <style>
     /* Custom styles for the checkbox column */
-    .wtc-checkbox-column {
+    .pssx-checkbox-column {
         width: 50px;
         text-align: center;
     }
-    .wtc-checkbox-column-header {
+    .pssx-checkbox-column-header {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -285,7 +285,7 @@ function wtc_render_ips_tab() {
     }
     </style>
 
-    <table id="wtc-ips-table" class="wp-list-table widefat fixed striped">
+    <table id="pssx-ips-table" class="wp-list-table widefat fixed striped">
         <thead>
             <tr>
                 <th><?php esc_html_e( 'ID', 'proactive-security-suite' ); ?></th>
@@ -299,9 +299,9 @@ function wtc_render_ips_tab() {
                 <th><?php esc_html_e( 'Block Mode', 'proactive-security-suite' ); ?></th>
                 <th><?php esc_html_e( 'CF Response', 'proactive-security-suite' ); ?></th>
                 <th><?php esc_html_e( 'Is Sent', 'proactive-security-suite' ); ?></th>
-                <th class="wtc-checkbox-column">
-                    <div class="wtc-checkbox-column-header">
-                        <input type="checkbox" id="wtc-select-all">
+                <th class="pssx-checkbox-column">
+                    <div class="pssx-checkbox-column-header">
+                        <input type="checkbox" id="pssx-select-all">
                     </div>
                 </th>
             </tr>
@@ -339,16 +339,16 @@ function wtc_render_ips_tab() {
                     <td><?php echo esc_html( ucfirst( str_replace( '_', ' ', $ip->block_mode ) ) ); ?></td>
                     <td><?php echo esc_html( $ip->cfResponse ); ?></td>
                     <td><?php echo esc_html( $ip->isSent ); ?></td>
-                    <td class="wtc-checkbox-column">
-                        <input type="checkbox" class="wtc-delete-checkbox" value="<?php echo esc_attr( $ip->id ); ?>" data-ip="<?php echo esc_attr( $ip->ip ); ?>">
+                    <td class="pssx-checkbox-column">
+                        <input type="checkbox" class="pssx-delete-checkbox" value="<?php echo esc_attr( $ip->id ); ?>" data-ip="<?php echo esc_attr( $ip->ip ); ?>">
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 
-    <button id="wtc-delete-selected" class="button button-primary"><?php esc_html_e( 'Delete Selected', 'proactive-security-suite' ); ?></button>
-    <button id="wtc-delete-selected-cloudflare" class="button button-primary"><?php esc_html_e( 'Delete Selected (Cloudflare)', 'proactive-security-suite' ); ?></button>
+    <button id="pssx-delete-selected" class="button button-primary"><?php esc_html_e( 'Delete Selected', 'proactive-security-suite' ); ?></button>
+    <button id="pssx-delete-selected-cloudflare" class="button button-primary"><?php esc_html_e( 'Delete Selected (Cloudflare)', 'proactive-security-suite' ); ?></button>
 
     <?php
 }

@@ -4,9 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-
 // AJAX handler for deleting IPs from the database.
-function wtc_delete_ips() {
+function pssx_delete_ips() {
     check_ajax_referer( 'wtc_ips_tab_action', 'wtc_ips_tab_nonce' );
 
     if ( ! current_user_can( 'manage_options' ) ) {
@@ -22,24 +21,17 @@ function wtc_delete_ips() {
     }
 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'wtc_blocked_ips';
+    $table_name = $wpdb->prefix . 'pssx_blocked_ips';
     $table_name = esc_sql( $table_name );
 
-    // Build the placeholders string, e.g., "%d, %d, %d"
     $placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
 
-    // Build the SQL query
     $sql = "DELETE FROM {$table_name} WHERE id IN ($placeholders)";
-
-    // Prepare the SQL query by passing parameters individually
     $args = array_merge( array( $sql ), $ids );
     $prepared_query = call_user_func_array( array( $wpdb, 'prepare' ), $args );
-
-    // Execute the query
     $result = $wpdb->query( $prepared_query );
 
     if ( false === $result ) {
-        // Handle the error
         wp_send_json_error( 'Database error occurred.' );
         wp_die();
     } else {
@@ -47,12 +39,10 @@ function wtc_delete_ips() {
         wp_die();
     }
 }
-add_action( 'wp_ajax_wtc_delete_ips', 'wtc_delete_ips' );
-
+add_action( 'wp_ajax_pssx_delete_ips', 'pssx_delete_ips' );
 
 // AJAX handler for deleting IPs from Cloudflare.
-function wtc_delete_ips_cloudflare() {
-    // Verify the nonce before processing the request.
+function pssx_delete_ips_cloudflare() {
     check_ajax_referer( 'wtc_ips_tab_action', 'wtc_ips_tab_nonce' );
 
     if ( ! current_user_can( 'manage_options' ) ) {
@@ -63,7 +53,6 @@ function wtc_delete_ips_cloudflare() {
         wp_die();
     }
 
-    // Sanitize and validate the IPs from $_POST['ips']
     $ips_raw = isset( $_POST['ips'] ) ? wp_unslash( $_POST['ips'] ) : array();
 
     if ( ! is_array( $ips_raw ) ) {
@@ -107,7 +96,6 @@ function wtc_delete_ips_cloudflare() {
     $deleted_ips = array();
 
     foreach ( $ips_to_delete as $ip ) {
-        // Construct the API URL to fetch the access rule for the IP.
         $api_url = 'https://api.cloudflare.com/client/v4/zones/' . urlencode( $cf_zone_id ) . '/firewall/access_rules/rules?configuration.value=' . urlencode( $ip );
 
         $headers = array(
@@ -116,7 +104,6 @@ function wtc_delete_ips_cloudflare() {
             'X-Auth-Key'   => $cf_api_key,
         );
 
-        // Get all IP access rules from Cloudflare.
         $args = array(
             'headers' => $headers,
             'method'  => 'GET',
@@ -126,21 +113,18 @@ function wtc_delete_ips_cloudflare() {
         $response = wp_remote_get( $api_url, $args );
 
         if ( is_wp_error( $response ) ) {
-            // Handle the error appropriately.
             continue;
         }
 
         $data = json_decode( wp_remote_retrieve_body( $response ), true );
 
         if ( empty( $data['result'] ) ) {
-            // No matching IP access rule found in Cloudflare.
             continue;
         }
 
         $matchedRuleId   = $data['result'][0]['id'];
         $matchedRuleType = $data['result'][0]['scope']['type'];
 
-        // Delete the matched IP rule from Cloudflare.
         if ( $matchedRuleType === 'zone' ) {
             $delete_url = 'https://api.cloudflare.com/client/v4/zones/' . urlencode( $cf_zone_id ) . '/firewall/access_rules/rules/' . urlencode( $matchedRuleId );
         } else {
@@ -156,7 +140,6 @@ function wtc_delete_ips_cloudflare() {
         $delete_response = wp_remote_request( $delete_url, $delete_args );
 
         if ( is_wp_error( $delete_response ) ) {
-            // Handle the error appropriately.
             continue;
         }
 
@@ -166,17 +149,13 @@ function wtc_delete_ips_cloudflare() {
             $deleted_ips[] = $ip;
 
             global $wpdb;
-            $table_name = $wpdb->prefix . 'wtc_blocked_ips';
-
-            // Delete the IP from the custom table.
+            $table_name = $wpdb->prefix . 'pssx_blocked_ips';
             $wpdb->delete( $table_name, array( 'ip' => $ip ), array( '%s' ) );
         } else {
-            // Handle the error appropriately.
             continue;
         }
     }
 
-    // Send the response.
     if ( ! empty( $deleted_ips ) ) {
         wp_send_json_success( array(
             'type'        => 'success',
@@ -192,10 +171,10 @@ function wtc_delete_ips_cloudflare() {
 
     wp_die();
 }
-add_action( 'wp_ajax_wtc_delete_ips_cloudflare', 'wtc_delete_ips_cloudflare' );
+add_action( 'wp_ajax_pssx_delete_ips_cloudflare', 'pssx_delete_ips_cloudflare' );
 
 // AJAX handler to get all IDs and IPs
-function wtc_get_all_ids_ips() {
+function pssx_get_all_ids_ips() {
     check_ajax_referer( 'wtc_ips_tab_action', 'wtc_ips_tab_nonce' );
 
     if ( ! current_user_can( 'manage_options' ) ) {
@@ -204,7 +183,7 @@ function wtc_get_all_ids_ips() {
     }
 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'wtc_blocked_ips';
+    $table_name = $wpdb->prefix . 'pssx_blocked_ips';
 
     $results = $wpdb->get_results( "SELECT id, ip FROM $table_name" );
 
@@ -220,4 +199,4 @@ function wtc_get_all_ids_ips() {
         wp_send_json_error( 'Failed to fetch IDs and IPs.' );
     }
 }
-add_action( 'wp_ajax_wtc_get_all_ids_ips', 'wtc_get_all_ids_ips' );
+add_action( 'wp_ajax_pssx_get_all_ids_ips', 'pssx_get_all_ids_ips' );

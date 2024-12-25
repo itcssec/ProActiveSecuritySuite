@@ -2,8 +2,8 @@
 
 /*
 Plugin Name: Proactive Security Suite PremiumPlus
- Description: Enhance your WordPress website’s security with the ProActive Security Suite. This powerful plugin offers advanced security features including automatic IP blocking, an advanced rule builder, traffic analysis, and seamless integration with services like Cloudflare, AbuseIPDB, and Whatismybrowser.com. ProActive Security Suite provides proactive defense mechanisms to protect your site from malicious traffic and potential threats before they reach your server.
-Version: 1.5.7
+Description: Enhance your WordPress website’s security with the ProActive Security Suite. This powerful plugin offers advanced security features including automatic IP blocking, an advanced rule builder, traffic analysis, and seamless integration with services like Cloudflare, AbuseIPDB, and Whatismybrowser.com. ProActive Security Suite provides proactive defense mechanisms to protect your site from malicious traffic and potential threats before they reach your server.
+Version: 1.5.8
 Author: ITCS
 Author URI: https://itcs.services/
 License: GPLv2 or later
@@ -45,47 +45,46 @@ if ( !function_exists( 'wor_fs' ) ) {
     wor_fs();
     do_action( 'wor_fs_loaded' );
 }
-// Define plugin constants.
-define( 'WTC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'WTC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+// Define plugin constants (Renamed to PSSX_PLUGIN_DIR / PSSX_PLUGIN_URL).
+define( 'PSSX_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'PSSX_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 // Include necessary files.
-require_once WTC_PLUGIN_DIR . 'includes/helpers.php';
-require_once WTC_PLUGIN_DIR . 'includes/admin-settings.php';
-require_once WTC_PLUGIN_DIR . 'includes/blocked-ips.php';
-require_once WTC_PLUGIN_DIR . 'includes/ajax-handlers.php';
-require_once WTC_PLUGIN_DIR . 'includes/scripts.php';
+require_once PSSX_PLUGIN_DIR . 'includes/helpers.php';
+require_once PSSX_PLUGIN_DIR . 'includes/admin-settings.php';
+require_once PSSX_PLUGIN_DIR . 'includes/blocked-ips.php';
+require_once PSSX_PLUGIN_DIR . 'includes/ajax-handlers.php';
+require_once PSSX_PLUGIN_DIR . 'includes/scripts.php';
 // Activation hook to schedule cron job.
-register_activation_hook( __FILE__, 'wtc_activate_plugin' );
-function wtc_activate_plugin() {
-    wtc_schedule_cron_job();
+register_activation_hook( __FILE__, 'pssx_activate_plugin' );
+function pssx_activate_plugin() {
+    pssx_schedule_cron_job();
 }
 
 // Deactivation hook to clear scheduled cron job.
-register_deactivation_hook( __FILE__, 'wtc_deactivate_plugin' );
-function wtc_deactivate_plugin() {
-    wp_clear_scheduled_hook( 'wtc_check_new_blocked_ips' );
+register_deactivation_hook( __FILE__, 'pssx_deactivate_plugin' );
+function pssx_deactivate_plugin() {
+    wp_clear_scheduled_hook( 'pssx_check_new_blocked_ips' );
 }
 
 // Schedule the cron job if not already scheduled.
-function wtc_schedule_cron_job() {
-    if ( !wp_next_scheduled( 'wtc_check_new_blocked_ips' ) ) {
+function pssx_schedule_cron_job() {
+    if ( !wp_next_scheduled( 'pssx_check_new_blocked_ips' ) ) {
         $cron_interval = get_option( 'cron_interval', 'hourly' );
         if ( $cron_interval !== 'none' ) {
-            wp_schedule_event( time(), $cron_interval, 'wtc_check_new_blocked_ips' );
+            wp_schedule_event( time(), $cron_interval, 'pssx_check_new_blocked_ips' );
         }
     }
 }
 
 // Plugin initialization.
-function wtc_init_plugin() {
-    // Check and create custom tables.
-    wtc_check_custom_tables();
-    // Enqueue scripts and styles.
-    add_action( 'admin_enqueue_scripts', 'wtc_enqueue_scripts' );
+function pssx_init_plugin() {
+    pssx_check_custom_tables();
+    // Enqueue scripts and styles in admin.
+    add_action( 'admin_enqueue_scripts', 'pssx_enqueue_scripts' );
 }
 
-add_action( 'init', 'wtc_init_plugin' );
+add_action( 'init', 'pssx_init_plugin' );
 // Uninstall hook for cleanup.
 if ( function_exists( 'register_uninstall_hook' ) ) {
-    register_uninstall_hook( __FILE__, 'wtc_uninstall_plugin' );
+    register_uninstall_hook( __FILE__, 'pssx_uninstall_plugin' );
 }

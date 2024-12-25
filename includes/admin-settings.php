@@ -4,30 +4,32 @@
 if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
-// Include the helpers file to ensure wtc_update_cron_schedule() is available.
-require_once WTC_PLUGIN_DIR . 'includes/helpers.php';
-function wtc_add_settings_link(  $links  ) {
+// Include the helpers file to ensure pssx_update_cron_schedule() is available.
+require_once PSSX_PLUGIN_DIR . 'includes/helpers.php';
+// Add the Settings link on the plugin listing page.
+function pssx_add_settings_link(  $links  ) {
     $settings_link = '<a href="' . esc_url( admin_url( 'options-general.php?page=pss-settings' ) ) . '">' . __( 'Settings', 'proactive-security-suite' ) . '</a>';
     array_unshift( $links, $settings_link );
     return $links;
 }
 
-add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'wtc_add_settings_link' );
-function wtc_menu() {
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'pssx_add_settings_link' );
+// Add the "PSS Settings" submenu under "Settings".
+function pssx_menu() {
     add_options_page(
         'PSS Settings',
         'PSS Settings',
         'manage_options',
         'pss-settings',
-        'wtc_render_admin_page'
+        'pssx_render_admin_page'
     );
 }
 
-add_action( 'admin_menu', 'wtc_menu' );
+add_action( 'admin_menu', 'pssx_menu' );
 /**
  * Main admin page router.
  */
-function wtc_render_admin_page() {
+function pssx_render_admin_page() {
     if ( !current_user_can( 'manage_options' ) ) {
         wp_die( 'Access is not allowed.' );
     }
@@ -35,7 +37,7 @@ function wtc_render_admin_page() {
     ?>
     <div class="wrap">
         <h1><?php 
-    esc_html_e( 'Wordfence to Cloudflare', 'proactive-security-suite' );
+    esc_html_e( 'Proactive Security Suite', 'proactive-security-suite' );
     ?></h1>
 
         <h2 class="nav-tab-wrapper">
@@ -47,9 +49,9 @@ function wtc_render_admin_page() {
     esc_html_e( 'Settings', 'proactive-security-suite' );
     ?>
             </a>
-            <a href="?page=pss-settings&tab=wtc-ips"
+            <a href="?page=pss-settings&tab=pssx-ips"
                class="nav-tab <?php 
-    echo ( $active_tab === 'wtc-ips' ? 'nav-tab-active' : '' );
+    echo ( $active_tab === 'pssx-ips' ? 'nav-tab-active' : '' );
     ?>">
                <?php 
     esc_html_e( 'Blocked IPs', 'proactive-security-suite' );
@@ -79,24 +81,24 @@ function wtc_render_admin_page() {
 
         <?php 
     switch ( $active_tab ) {
-        case 'wtc-ips':
-            wtc_render_ips_tab();
+        case 'pssx-ips':
+            pssx_render_ips_tab();
             break;
-        case 'wtc-traffic':
+        case 'pssx-traffic':
             echo '<div class="notice notice-warning"><p>' . esc_html__( 'The Captured Traffic Data feature is available in the premium version. Please upgrade to access this feature.', 'proactive-security-suite' ) . '</p></div>';
             if ( function_exists( 'wor_fs' ) ) {
                 wor_fs()->get_logger()->warning( 'Attempted access to premium tab: Captured Traffic Data' );
                 wor_fs()->add_upgrade_button();
             }
             break;
-        case 'wtc-rules':
+        case 'pssx-rules':
             echo '<div class="notice notice-warning"><p>' . esc_html__( 'The Rule Builder feature is available in the premium version. Please upgrade to access this feature.', 'proactive-security-suite' ) . '</p></div>';
             if ( function_exists( 'wor_fs' ) ) {
                 wor_fs()->get_logger()->warning( 'Attempted access to premium tab: Rule Builder' );
                 wor_fs()->add_upgrade_button();
             }
             break;
-        case 'wtc-insights':
+        case 'pssx-insights':
             echo '<div class="notice notice-warning"><p>' . esc_html__( 'Traffic Insights is available in the premium version. Please upgrade to access this feature.', 'proactive-security-suite' ) . '</p></div>';
             if ( function_exists( 'wor_fs' ) ) {
                 wor_fs()->get_logger()->warning( 'Attempted access to premium tab: Traffic Insights' );
@@ -104,7 +106,7 @@ function wtc_render_admin_page() {
             }
             break;
         default:
-            wtc_render_settings_tab();
+            pssx_render_settings_tab();
             break;
     }
     ?>
@@ -114,31 +116,28 @@ function wtc_render_admin_page() {
 
 /**
  * Renders the new premium-only "Traffic Insights" tab
- * which shows unique IPs and stats.
  */
-function wtc_render_traffic_insights_tab() {
-    // We delegate the rendering to our new class to keep things clean.
-    if ( class_exists( 'WTC_Traffic_Insights' ) ) {
-        WTC_Traffic_Insights::render_insights_page();
+function pssx_render_traffic_insights_tab() {
+    if ( class_exists( 'pssx_Traffic_Insights' ) ) {
+        PSSX_Traffic_Insights::render_insights_page();
     } else {
-        // Fallback if the class isn't loaded
         echo '<div class="notice notice-error"><p>' . esc_html__( 'Traffic Insights class is not available.', 'proactive-security-suite' ) . '</p></div>';
     }
 }
 
-function wtc_render_settings_tab() {
+function pssx_render_settings_tab() {
     if ( !current_user_can( 'manage_options' ) ) {
         wp_die( 'Access is not allowed.' );
     }
-    if ( isset( $_POST['wtc_settings_submit'] ) && check_admin_referer( 'wtc_settings_action', 'wtc_settings_nonce' ) ) {
+    if ( isset( $_POST['pssx_settings_submit'] ) && check_admin_referer( 'pssx_settings_action', 'pssx_settings_nonce' ) ) {
         $cloudflare_email = sanitize_email( $_POST['cloudflare_email'] );
         $cloudflare_key_input = sanitize_text_field( $_POST['cloudflare_key'] );
         $cloudflare_zone_id = sanitize_text_field( $_POST['cloudflare_zone_id'] );
         $cloudflare_account_id = sanitize_text_field( $_POST['cloudflare_account_id'] );
         $abuseipdb_api_id_input = sanitize_text_field( $_POST['abuseipdb_api_id'] );
-        $blocked_hits_threshold = intval( $_POST['blocked_hits_threshold'] );
-        $block_scope = sanitize_text_field( $_POST['block_scope'] );
-        $block_mode = sanitize_text_field( $_POST['block_mode'] );
+        $blocked_hits_threshold = intval( $_POST['pssx_blocked_hits_threshold'] );
+        $block_scope = sanitize_text_field( $_POST['pssx_block_scope'] );
+        $block_mode = sanitize_text_field( $_POST['pssx_block_mode'] );
         $cron_interval = sanitize_text_field( $_POST['cron_interval'] );
         update_option( 'cloudflare_email', $cloudflare_email );
         if ( !empty( $cloudflare_key_input ) && $cloudflare_key_input !== str_repeat( '*', 10 ) ) {
@@ -149,16 +148,16 @@ function wtc_render_settings_tab() {
         if ( !empty( $abuseipdb_api_id_input ) && $abuseipdb_api_id_input !== str_repeat( '*', 10 ) ) {
             update_option( 'abuseipdb_api_id', $abuseipdb_api_id_input );
         }
-        $wtc_enable_abuseipdb = ( isset( $_POST['wtc_enable_abuseipdb'] ) ? 'yes' : 'no' );
-        update_option( 'wtc_enable_abuseipdb', $wtc_enable_abuseipdb );
-        update_option( 'blocked_hits_threshold', $blocked_hits_threshold );
-        update_option( 'block_scope', $block_scope );
-        update_option( 'block_mode', $block_mode );
+        $pssx_enable_abuseipdb = ( isset( $_POST['pssx_enable_abuseipdb'] ) ? 'yes' : 'no' );
+        update_option( 'pssx_enable_abuseipdb', $pssx_enable_abuseipdb );
+        update_option( 'pssx_blocked_hits_threshold', $blocked_hits_threshold );
+        update_option( 'pssx_block_scope', $block_scope );
+        update_option( 'pssx_block_mode', $block_mode );
         update_option( 'cron_interval', $cron_interval );
-        wtc_update_cron_schedule();
+        pssx_update_cron_schedule();
         add_settings_error(
-            'wtc_settings',
-            'wtc_settings_updated',
+            'pssx_settings',
+            'pssx_settings_updated',
             __( 'Settings saved.', 'proactive-security-suite' ),
             'updated'
         );
@@ -169,20 +168,20 @@ function wtc_render_settings_tab() {
     $cloudflare_account_id = get_option( 'cloudflare_account_id', '' );
     $abuseipdb_api_id = get_option( 'abuseipdb_api_id', '' );
     $whatismybr_api_id = get_option( 'whatismybr_api_id', '' );
-    $blocked_hits_threshold = get_option( 'blocked_hits_threshold', 0 );
-    $block_scope = get_option( 'block_scope', 'domain' );
-    $block_mode = get_option( 'block_mode', 'block' );
+    $blocked_hits_threshold = get_option( 'pssx_blocked_hits_threshold', 0 );
+    $block_scope = get_option( 'pssx_block_scope', 'domain' );
+    $block_mode = get_option( 'pssx_block_mode', 'block' );
     $cron_interval = get_option( 'cron_interval', 'hourly' );
-    $wtc_last_processed_time = get_option( 'wtc_last_processed_time', '' );
-    $wtc_processed_ips_count = get_option( 'wtc_processed_ips_count', 0 );
-    $wtc_enable_traffic_capture = get_option( 'wtc_enable_traffic_capture', 'yes' );
-    $wtc_enable_abuseipdb = get_option( 'wtc_enable_abuseipdb', 'no' );
-    $wtc_enable_abuseipdb_lookup_traffic = get_option( 'wtc_enable_abuseipdb_lookup_traffic', 'no' );
-    $wtc_excluded_roles = get_option( 'wtc_excluded_roles', array() );
+    $pssx_last_processed_time = get_option( 'pssx_last_processed_time', '' );
+    $pssx_processed_ips_count = get_option( 'pssx_processed_ips_count', 0 );
+    $pssx_enable_traffic_capture = get_option( 'pssx_enable_traffic_capture', 'yes' );
+    $pssx_enable_abuseipdb = get_option( 'pssx_enable_abuseipdb', 'no' );
+    $pssx_enable_abuseipdb_lookup_traffic = get_option( 'pssx_enable_abuseipdb_lookup_traffic', 'no' );
+    $pssx_excluded_roles = get_option( 'pssx_excluded_roles', array() );
     $editable_roles = get_editable_roles();
     $ipdata_api_id = get_option( 'ipdata_api_id', '' );
-    $wtc_enable_ipdata_lookup_traffic = get_option( 'wtc_enable_ipdata_lookup_traffic', 'no' );
-    settings_errors( 'wtc_settings' );
+    $pssx_enable_ipdata_lookup_traffic = get_option( 'pssx_enable_ipdata_lookup_traffic', 'no' );
+    settings_errors( 'pssx_settings' );
     ?>
     <div class="wrap">
         <h1><?php 
@@ -190,7 +189,7 @@ function wtc_render_settings_tab() {
     ?></h1>
         <form method="post" action="">
             <?php 
-    wp_nonce_field( 'wtc_settings_action', 'wtc_settings_nonce' );
+    wp_nonce_field( 'pssx_settings_action', 'pssx_settings_nonce' );
     ?>
             <table class="form-table">
                 <!-- Cloudflare Settings -->
@@ -252,8 +251,8 @@ function wtc_render_settings_tab() {
                     <th scope="row"><?php 
     esc_html_e( 'Enable AbuseIPDB Lookup', 'proactive-security-suite' );
     ?></th>
-                    <td><input type="checkbox" name="wtc_enable_abuseipdb" value="yes" <?php 
-    checked( 'yes', $wtc_enable_abuseipdb );
+                    <td><input type="checkbox" name="pssx_enable_abuseipdb" value="yes" <?php 
+    checked( 'yes', $pssx_enable_abuseipdb );
     ?> /></td>
                 </tr>
 
@@ -310,7 +309,7 @@ function wtc_render_settings_tab() {
                     <th scope="row"><?php 
     esc_html_e( 'Blocked Hits Threshold', 'proactive-security-suite' );
     ?></th>
-                    <td><input type="number" min="0" name="blocked_hits_threshold" value="<?php 
+                    <td><input type="number" min="0" name="pssx_blocked_hits_threshold" value="<?php 
     echo esc_attr( $blocked_hits_threshold );
     ?>" /></td>
                 </tr>
@@ -321,7 +320,7 @@ function wtc_render_settings_tab() {
     esc_html_e( 'Block Scope', 'proactive-security-suite' );
     ?></th>
                     <td>
-                        <select name="block_scope">
+                        <select name="pssx_block_scope">
                             <option value="domain" <?php 
     selected( 'domain', $block_scope );
     ?>><?php 
@@ -342,7 +341,7 @@ function wtc_render_settings_tab() {
     esc_html_e( 'Block Mode', 'proactive-security-suite' );
     ?></th>
                     <td>
-                        <select name="block_mode">
+                        <select name="pssx_block_mode">
                             <option value="block" <?php 
     selected( 'block', $block_mode );
     ?>><?php 
@@ -408,7 +407,7 @@ function wtc_render_settings_tab() {
     esc_html_e( 'Last Cron Run:', 'proactive-security-suite' );
     ?></th>
                     <td><?php 
-    echo esc_html( $wtc_last_processed_time );
+    echo esc_html( $pssx_last_processed_time );
     ?></td>
                 </tr>
                 <tr valign="top">
@@ -416,23 +415,23 @@ function wtc_render_settings_tab() {
     esc_html_e( 'IPs Processed:', 'proactive-security-suite' );
     ?></th>
                     <td><?php 
-    echo esc_html( $wtc_processed_ips_count );
+    echo esc_html( $pssx_processed_ips_count );
     ?></td>
                 </tr>
             </table>
 
             <?php 
-    submit_button( __( 'Save Settings', 'proactive-security-suite' ), 'primary', 'wtc_settings_submit' );
+    submit_button( __( 'Save Settings', 'proactive-security-suite' ), 'primary', 'pssx_settings_submit' );
     ?>
         </form>
 
         <form method="post" action="<?php 
-    echo esc_url( admin_url( 'admin-post.php?action=wtc_run_process' ) );
+    echo esc_url( admin_url( 'admin-post.php?action=pssx_run_process' ) );
     ?>">
             <?php 
-    wp_nonce_field( 'wtc_run_process_action', 'wtc_run_process_nonce' );
+    wp_nonce_field( 'pssx_run_process_action', 'pssx_run_process_nonce' );
     ?>
-            <button type="submit" name="wtc_run_process" class="button button-primary"><?php 
+            <button type="submit" name="pssx_run_process" class="button button-primary"><?php 
     esc_html_e( 'Run Process', 'proactive-security-suite' );
     ?></button>
         </form>
@@ -442,10 +441,10 @@ function wtc_render_settings_tab() {
     echo esc_url( admin_url( 'admin-post.php' ) );
     ?>">
             <?php 
-    wp_nonce_field( 'wtc_clear_data_action', 'wtc_clear_data_nonce' );
+    wp_nonce_field( 'pssx_clear_data_action', 'pssx_clear_data_nonce' );
     ?>
-            <input type="hidden" name="action" value="wtc_clear_data">
-            <button type="submit" name="wtc_clear_data" class="button button-secondary"><?php 
+            <input type="hidden" name="action" value="pssx_clear_data">
+            <button type="submit" name="pssx_clear_data" class="button button-secondary"><?php 
     esc_html_e( 'Clear Data', 'proactive-security-suite' );
     ?></button>
         </form>
@@ -456,41 +455,41 @@ function wtc_render_settings_tab() {
     <?php 
 }
 
-// Handle deletion of captured traffic data (Premium Only).
-function wtc_handle_delete_captured_traffic_action() {
-    if ( isset( $_POST['action'] ) && $_POST['action'] === 'wtc_delete_captured_traffic' && check_admin_referer( 'wtc_delete_captured_traffic', 'wtc_delete_nonce' ) ) {
+// The following handle forms for deleting data or running processes (renamed or left as-is except for prefix changes in function).
+function pssx_handle_delete_captured_traffic_action() {
+    if ( isset( $_POST['action'] ) && $_POST['action'] === 'pssx_delete_captured_traffic' && check_admin_referer( 'pssx_delete_captured_traffic', 'pssx_delete_nonce' ) ) {
         wp_die( 'Access is not allowed.' );
         global $wpdb;
-        $table_name = $wpdb->prefix . 'wtc_traffic_data';
+        $table_name = $wpdb->prefix . 'pssx_traffic_data';
         $wpdb->query( "TRUNCATE TABLE {$table_name}" );
-        $redirect_url = add_query_arg( 'wtc_message', 'deleted', admin_url( 'options-general.php?page=pss-settings&tab=wtc-traffic' ) );
+        $redirect_url = add_query_arg( 'pssx_message', 'deleted', admin_url( 'options-general.php?page=pss-settings&tab=pssx-traffic' ) );
         wp_safe_redirect( $redirect_url );
         exit;
     }
 }
 
-add_action( 'admin_post_wtc_delete_captured_traffic', 'wtc_handle_delete_captured_traffic_action' );
-function wtc_clear_data() {
-    if ( isset( $_POST['wtc_clear_data'] ) && check_admin_referer( 'wtc_clear_data_action', 'wtc_clear_data_nonce' ) ) {
-        delete_option( 'wtc_last_processed_time' );
-        delete_option( 'wtc_processed_ips_count' );
+add_action( 'admin_post_pssx_delete_captured_traffic', 'pssx_handle_delete_captured_traffic_action' );
+function pssx_clear_data() {
+    if ( isset( $_POST['pssx_clear_data'] ) && check_admin_referer( 'pssx_clear_data_action', 'pssx_clear_data_nonce' ) ) {
+        delete_option( 'pssx_last_processed_time' );
+        delete_option( 'pssx_processed_ips_count' );
         wp_redirect( admin_url( 'options-general.php?page=pss-settings' ) );
         exit;
     }
 }
 
-add_action( 'admin_post_wtc_clear_data', 'wtc_clear_data' );
-function wtc_run_process_manually() {
-    if ( isset( $_POST['wtc_run_process'] ) && check_admin_referer( 'wtc_run_process_action', 'wtc_run_process_nonce' ) ) {
-        wtc_fetch_and_store_blocked_ips();
-        wtc_add_ips_to_cloudflare();
+add_action( 'admin_post_pssx_clear_data', 'pssx_clear_data' );
+function pssx_run_process_manually() {
+    if ( isset( $_POST['pssx_run_process'] ) && check_admin_referer( 'pssx_run_process_action', 'pssx_run_process_nonce' ) ) {
+        pssx_fetch_and_store_blocked_ips();
+        pssx_add_ips_to_cloudflare();
         wp_redirect( admin_url( 'options-general.php?page=pss-settings' ) );
         exit;
     }
 }
 
-add_action( 'admin_post_wtc_run_process', 'wtc_run_process_manually' );
-function wtc_admin_styles() {
+add_action( 'admin_post_pssx_run_process', 'pssx_run_process_manually' );
+function pssx_admin_styles() {
     echo '<style>
     .nav-tab.disabled {
         color: #a7aaad;
@@ -504,13 +503,16 @@ function wtc_admin_styles() {
     </style>';
 }
 
-add_action( 'admin_head', 'wtc_admin_styles' );
-function wtc_render_rule_builder_tab() {
+add_action( 'admin_head', 'pssx_admin_styles' );
+/**
+ * Rule Builder tab (Premium).
+ */
+function pssx_render_rule_builder_tab() {
     if ( !current_user_can( 'manage_options' ) ) {
         wp_die( 'Access is not allowed.' );
     }
     // Handle form submission for adding a new rule.
-    if ( isset( $_POST['wtc_add_rule_nonce'] ) && check_admin_referer( 'wtc_add_rule_action', 'wtc_add_rule_nonce' ) ) {
+    if ( isset( $_POST['pssx_add_rule_nonce'] ) && check_admin_referer( 'pssx_add_rule_action', 'pssx_add_rule_nonce' ) ) {
         $criteria = array();
         // Confidence Score
         if ( !empty( $_POST['confidence_score_operator'] ) && isset( $_POST['confidence_score_value'] ) && $_POST['confidence_score_value'] !== '' ) {
@@ -567,28 +569,29 @@ function wtc_render_rule_builder_tab() {
         $action = sanitize_text_field( $_POST['action'] );
         $priority = intval( $_POST['priority'] );
         global $wpdb;
-        $rules_table = $wpdb->prefix . 'wtc_rules';
+        $rules_table = $wpdb->prefix . 'pssx_rules';
+        // (We didn’t rename this table file reference to keep minimal changes, or rename it as well if you wish.)
         $wpdb->insert( $rules_table, array(
             'criteria' => wp_json_encode( $criteria ),
             'action'   => $action,
             'priority' => $priority,
         ), array('%s', '%s', '%d') );
-        wp_redirect( add_query_arg( 'message', 'rule_added', admin_url( 'options-general.php?page=pss-settings&tab=wtc-rules' ) ) );
+        wp_redirect( add_query_arg( 'message', 'rule_added', admin_url( 'options-general.php?page=pss-settings&tab=pssx-rules' ) ) );
         exit;
     }
     // Handle deletion of a rule.
-    if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete_rule' && isset( $_GET['rule_id'] ) && check_admin_referer( 'wtc_delete_rule_nonce', '_wpnonce' ) ) {
+    if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete_rule' && isset( $_GET['rule_id'] ) && check_admin_referer( 'pssx_delete_rule_nonce', '_wpnonce' ) ) {
         $rule_id = intval( $_GET['rule_id'] );
         global $wpdb;
-        $rules_table = $wpdb->prefix . 'wtc_rules';
+        $rules_table = $wpdb->prefix . 'pssx_rules';
         $wpdb->delete( $rules_table, array(
             'id' => $rule_id,
         ), array('%d') );
-        wp_redirect( add_query_arg( 'message', 'rule_deleted', admin_url( 'options-general.php?page=pss-settings&tab=wtc-rules' ) ) );
+        wp_redirect( add_query_arg( 'message', 'rule_deleted', admin_url( 'options-general.php?page=pss-settings&tab=pssx-rules' ) ) );
         exit;
     }
     global $wpdb;
-    $rules_table = $wpdb->prefix . 'wtc_rules';
+    $rules_table = $wpdb->prefix . 'pssx_rules';
     $rules = $wpdb->get_results( "SELECT * FROM {$rules_table} ORDER BY priority DESC" );
     if ( isset( $_GET['message'] ) ) {
         if ( $_GET['message'] === 'rule_added' ) {
@@ -657,7 +660,7 @@ function wtc_render_rule_builder_tab() {
             echo esc_url( wp_nonce_url( add_query_arg( array(
                 'action'  => 'delete_rule',
                 'rule_id' => $rule->id,
-            ), admin_url( 'options-general.php?page=pss-settings&tab=wtc-rules' ) ), 'wtc_delete_rule_nonce' ) );
+            ), admin_url( 'options-general.php?page=pss-settings&tab=pssx-rules' ) ), 'pssx_delete_rule_nonce' ) );
             ?>"><?php 
             esc_html_e( 'Delete', 'proactive-security-suite' );
             ?></a>
@@ -685,7 +688,7 @@ function wtc_render_rule_builder_tab() {
     ?></h3>
     <form method="post" action="">
         <?php 
-    wp_nonce_field( 'wtc_add_rule_action', 'wtc_add_rule_nonce' );
+    wp_nonce_field( 'pssx_add_rule_action', 'pssx_add_rule_nonce' );
     ?>
         <table class="form-table">
             <!-- Confidence Score -->

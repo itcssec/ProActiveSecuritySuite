@@ -4,7 +4,7 @@ Tags: Wordfence, Cloudflare, Security, Wordpress Security, Firewall
 Requires at least: 5.2
 Requires PHP: 7.4
 Tested up to: 6.7
-Stable tag: 1.5.7
+Stable tag: 1.5.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -283,9 +283,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Upgrade Notice ==
 
-= 1.5.7 =
+= 1.5.8 =
 
-Introducing Traffic Insights, our newest premium feature that provides a single-page overview of unique IP addresses in your captured traffic. Analyze threat intelligence fields from IPData (Tor, Proxy, Known Attacker/Abuser, etc.) alongside the latest OS, browser software, and user agent details from WhatIsMyBrowser. Gain valuable statistics like total unique IPs, top countries, average confidence scores, and more—all from one intuitive dashboard. Upgrade to unlock this powerful tool and enhance your site’s proactive security strategy today!
+Code refactoring.
 
 == Changelog ==
 
@@ -456,3 +456,32 @@ Compatibility: Confirmed compatibility with the latest WordPress and tested agai
 = 1.5.7 =
 
 Introducing Traffic Insights, our newest premium feature that provides a single-page overview of unique IP addresses in your captured traffic. Analyze threat intelligence fields from IPData (Tor, Proxy, Known Attacker/Abuser, etc.) alongside the latest OS, browser software, and user agent details from WhatIsMyBrowser. Gain valuable statistics like total unique IPs, top countries, average confidence scores, and more—all from one intuitive dashboard. Upgrade to unlock this powerful tool and enhance your site’s proactive security strategy today!
+
+= 1.5.8 =
+
+Code refactoring.
+
+
+== External Services ==
+
+**Cloudflare**  
+- **Usage**: We send visitor IPs (and optionally country/ISP data) to create Firewall rules.  
+- **Data Sent**: IP address, associated rule details.  
+- [Cloudflare Terms of Service](https://www.cloudflare.com/terms/) | [Cloudflare Privacy Policy](https://www.cloudflare.com/privacypolicy/)
+
+**AbuseIPDB**  
+- **Usage**: We check IP reputation, fetching country code, ISP, and confidence score.  
+- **Data Sent**: IP address.  
+- [AbuseIPDB Terms of Service](https://www.abuseipdb.com/terms.html) | [Privacy Policy](https://www.abuseipdb.com/privacy.html)
+
+**WhatIsMyBrowser**  
+- **Usage**: We send user agent strings to detect software (browser), OS, and if it’s abusive.  
+- **Data Sent**: User agent strings.  
+- [WhatIsMyBrowser Terms of Service](https://developers.whatismybrowser.com/api/terms/) |
+  [Privacy Policy](https://developers.whatismybrowser.com/api/privacy-policy)
+
+**IPData**  
+- **Usage**: We fetch detailed threat intelligence (Tor, proxy, known attacker, etc.).  
+- **Data Sent**: IP address.  
+- [IPData Terms](https://ipdata.co/terms-of-service.html) |
+  [Privacy Policy](https://ipdata.co/privacy.html)
