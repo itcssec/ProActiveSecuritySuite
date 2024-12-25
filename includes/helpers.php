@@ -9,7 +9,7 @@ function pssx_check_custom_tables() {
     global $wpdb;
 
     $blocked_ips_table = $wpdb->prefix . 'pssx_blocked_ips';
-    $rules_table       = $wpdb->prefix . 'pssx_rules'; 
+    $rules_table       = $wpdb->prefix . 'pssx_rules';
     $charset_collate   = $wpdb->get_charset_collate();
 
     $sql_blocked_ips = "CREATE TABLE {$blocked_ips_table} (
@@ -105,10 +105,12 @@ function pssx_migrate_old_tables() {
     $old_blocked_ips_exists = ( $wpdb->get_var(
         $wpdb->prepare( "SHOW TABLES LIKE %s", $old_blocked_ips_table )
     ) === $old_blocked_ips_table );
+    $new_blocked_ips_table_esc = esc_sql( $new_blocked_ips_table );
+    $old_blocked_ips_table_esc = esc_sql( $old_blocked_ips_table );
 
     if ( $old_blocked_ips_exists ) {
         $sql_blocked_ips = "
-            INSERT INTO `{$new_blocked_ips_table}` (
+            INSERT INTO `{$new_blocked_ips_table_esc}` (
                 blockedTime,
                 blockedHits,
                 ip,
@@ -135,13 +137,13 @@ function pssx_migrate_old_tables() {
                 block_mode,
                 rule_id,
                 rule_details
-            FROM `{$old_blocked_ips_table}`;
+            FROM `{$old_blocked_ips_table_esc}`;
         ";
 
         $insert_blocked_ips = $wpdb->query( $sql_blocked_ips );
         if ( $insert_blocked_ips !== false ) {
             // Drop the old table if successful
-            $wpdb->query( "DROP TABLE IF EXISTS `{$old_blocked_ips_table}`" );
+            $wpdb->query( "DROP TABLE IF EXISTS `{$old_blocked_ips_table_esc}`" );
         }
     }
 
@@ -149,10 +151,13 @@ function pssx_migrate_old_tables() {
     $old_traffic_data_exists = ( $wpdb->get_var(
         $wpdb->prepare( "SHOW TABLES LIKE %s", $old_traffic_data_table )
     ) === $old_traffic_data_table );
+    
+    $new_traffic_data_table_esc = esc_sql( $new_traffic_data_table );
+    $old_traffic_data_table_esc = esc_sql( $old_traffic_data_table );
 
     if ( $old_traffic_data_exists ) {
         $sql_traffic_data = "
-            INSERT INTO `{$new_traffic_data_table}` (
+            INSERT INTO `{$new_traffic_data_table_esc}` (
                 timestamp,
                 request_method,
                 request_uri,
@@ -205,12 +210,12 @@ function pssx_migrate_old_tables() {
                 ipdata_is_known_abuser,
                 ipdata_is_threat,
                 ipdata_is_bogon
-            FROM `{$old_traffic_data_table}`;
+            FROM `{$old_traffic_data_table_esc}`;
         ";
 
         $insert_traffic_data = $wpdb->query( $sql_traffic_data );
         if ( $insert_traffic_data !== false ) {
-            $wpdb->query( "DROP TABLE IF EXISTS `{$old_traffic_data_table}`" );
+            $wpdb->query( "DROP TABLE IF EXISTS `{$old_traffic_data_table_esc}`" );
         }
     }
 
