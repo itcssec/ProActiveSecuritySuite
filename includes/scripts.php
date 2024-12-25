@@ -5,9 +5,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 function pssx_enqueue_scripts( $hook ) {
-    // Only enqueue on your plugin's admin page.
-    error_log( '[PSSX] hook => ' . $hook );
-
     if ( 'settings_page_pss-settings' !== $hook ) {
         return;
     }
