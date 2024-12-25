@@ -6,29 +6,37 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // AJAX handler for deleting IPs from the database.
 function pssx_delete_ips() {
-    check_ajax_referer( 'wtc_ips_tab_action', 'wtc_ips_tab_nonce' );
+    check_ajax_referer( 'pssx_ips_tab_action', 'pssx_ips_tab_nonce' );
 
     if ( ! current_user_can( 'manage_options' ) ) {
         wp_send_json_error( 'Access is not allowed.' );
         wp_die();
     }
 
-    $ids = isset( $_POST['ids'] ) ? array_map( 'absint', wp_unslash( $_POST['ids'] ) ) : array();
+    // CHANGED: Now we properly sanitize + validate arrays
+    $ips_raw = isset( $_POST['ids'] ) ? (array) wp_unslash( $_POST['ids'] ) : array();
+    $ids = array_map( 'absint', $ips_raw ); // ensure numeric only
+
+    // Filter out any 0 or negative (in case they are invalid):
+    $ids = array_filter( $ids, function( $id ) {
+        return $id > 0;
+    });
 
     if ( empty( $ids ) ) {
-        wp_send_json_error( 'No IDs provided.' );
+        wp_send_json_error( 'No valid IDs provided.' );
         wp_die();
     }
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'pssx_blocked_ips';
-    $table_name = esc_sql( $table_name );
+    $table_name_esc = esc_sql( $table_name );
 
+    // CHANGED: Using a direct wpdb->prepare with placeholders
+    // Build placeholders: "(%d, %d, %d, ... )"
     $placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
+    $sql = "DELETE FROM `{$table_name_esc}` WHERE id IN ($placeholders)";
 
-    $sql = "DELETE FROM {$table_name} WHERE id IN ($placeholders)";
-    $args = array_merge( array( $sql ), $ids );
-    $prepared_query = call_user_func_array( array( $wpdb, 'prepare' ), $args );
+    $prepared_query = $wpdb->prepare( $sql, $ids );
     $result = $wpdb->query( $prepared_query );
 
     if ( false === $result ) {
@@ -43,7 +51,7 @@ add_action( 'wp_ajax_pssx_delete_ips', 'pssx_delete_ips' );
 
 // AJAX handler for deleting IPs from Cloudflare.
 function pssx_delete_ips_cloudflare() {
-    check_ajax_referer( 'wtc_ips_tab_action', 'wtc_ips_tab_nonce' );
+    check_ajax_referer( 'pssx_ips_tab_action', 'pssx_ips_tab_nonce' );
 
     if ( ! current_user_can( 'manage_options' ) ) {
         wp_send_json_error( array(
@@ -53,8 +61,8 @@ function pssx_delete_ips_cloudflare() {
         wp_die();
     }
 
+    // CHANGED: sanitize + validate
     $ips_raw = isset( $_POST['ips'] ) ? wp_unslash( $_POST['ips'] ) : array();
-
     if ( ! is_array( $ips_raw ) ) {
         wp_send_json_error( array(
             'type'    => 'error',
@@ -63,12 +71,12 @@ function pssx_delete_ips_cloudflare() {
         wp_die();
     }
 
+    // Thorough approach: sanitize_text_field + validate IP
     $ips_to_delete = array();
-
-    foreach ( $ips_raw as $ip ) {
-        $ip = trim( $ip );
-        if ( filter_var( $ip, FILTER_VALIDATE_IP ) ) {
-            $ips_to_delete[] = $ip;
+    foreach ( $ips_raw as $ip_raw ) {
+        $maybe_ip = sanitize_text_field( $ip_raw );
+        if ( filter_var( $maybe_ip, FILTER_VALIDATE_IP ) ) {
+            $ips_to_delete[] = $maybe_ip;
         }
     }
 
@@ -94,34 +102,26 @@ function pssx_delete_ips_cloudflare() {
     }
 
     $deleted_ips = array();
-
     foreach ( $ips_to_delete as $ip ) {
         $api_url = 'https://api.cloudflare.com/client/v4/zones/' . urlencode( $cf_zone_id ) . '/firewall/access_rules/rules?configuration.value=' . urlencode( $ip );
-
         $headers = array(
             'Content-Type' => 'application/json',
             'X-Auth-Email' => $cf_email,
             'X-Auth-Key'   => $cf_api_key,
         );
-
         $args = array(
             'headers' => $headers,
             'method'  => 'GET',
             'timeout' => 30,
         );
-
         $response = wp_remote_get( $api_url, $args );
-
         if ( is_wp_error( $response ) ) {
             continue;
         }
-
         $data = json_decode( wp_remote_retrieve_body( $response ), true );
-
         if ( empty( $data['result'] ) ) {
             continue;
         }
-
         $matchedRuleId   = $data['result'][0]['id'];
         $matchedRuleType = $data['result'][0]['scope']['type'];
 
@@ -136,23 +136,17 @@ function pssx_delete_ips_cloudflare() {
             'method'  => 'DELETE',
             'timeout' => 30,
         );
-
         $delete_response = wp_remote_request( $delete_url, $delete_args );
-
         if ( is_wp_error( $delete_response ) ) {
             continue;
         }
-
         $delete_data = json_decode( wp_remote_retrieve_body( $delete_response ), true );
-
         if ( ! empty( $delete_data['success'] ) && $delete_data['success'] === true ) {
             $deleted_ips[] = $ip;
 
             global $wpdb;
             $table_name = $wpdb->prefix . 'pssx_blocked_ips';
             $wpdb->delete( $table_name, array( 'ip' => $ip ), array( '%s' ) );
-        } else {
-            continue;
         }
     }
 
@@ -175,7 +169,7 @@ add_action( 'wp_ajax_pssx_delete_ips_cloudflare', 'pssx_delete_ips_cloudflare' )
 
 // AJAX handler to get all IDs and IPs
 function pssx_get_all_ids_ips() {
-    check_ajax_referer( 'wtc_ips_tab_action', 'wtc_ips_tab_nonce' );
+    check_ajax_referer( 'pssx_ips_tab_action', 'pssx_ips_tab_nonce' );
 
     if ( ! current_user_can( 'manage_options' ) ) {
         wp_send_json_error( 'Access is not allowed.' );
@@ -184,8 +178,7 @@ function pssx_get_all_ids_ips() {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'pssx_blocked_ips';
-
-    $results = $wpdb->get_results( "SELECT id, ip FROM $table_name" );
+    $results = $wpdb->get_results( "SELECT id, ip FROM `{$table_name}`" ); // table name sanitized at define time
 
     if ( $results ) {
         $ids = array();

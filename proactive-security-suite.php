@@ -3,9 +3,9 @@
 /*
 Plugin Name: Proactive Security Suite PremiumPlus
 Description: Enhance your WordPress website’s security with the ProActive Security Suite. This powerful plugin offers advanced security features including automatic IP blocking, an advanced rule builder, traffic analysis, and seamless integration with services like Cloudflare, AbuseIPDB, and Whatismybrowser.com. ProActive Security Suite provides proactive defense mechanisms to protect your site from malicious traffic and potential threats before they reach your server.
-Version: 1.5.8
+Version: 1.5.9
 Author: ITCS
-Author URI: https://itcs.services/
+Author URI: https://itcs.services
 License: GPLv2 or later
 Text Domain: proactive-security-suite
 */
@@ -45,7 +45,7 @@ if ( !function_exists( 'wor_fs' ) ) {
     wor_fs();
     do_action( 'wor_fs_loaded' );
 }
-// Define plugin constants (Renamed to PSSX_PLUGIN_DIR / PSSX_PLUGIN_URL).
+// Define plugin constants.
 define( 'PSSX_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PSSX_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 // Include necessary files.
@@ -81,6 +81,9 @@ function pssx_init_plugin() {
     pssx_check_custom_tables();
     // Enqueue scripts and styles in admin.
     add_action( 'admin_enqueue_scripts', 'pssx_enqueue_scripts' );
+    // CHANGED: Moved admin inline styles from echo to proper enqueuing
+    add_action( 'admin_enqueue_scripts', 'pssx_admin_inline_styles' );
+    add_action( 'admin_enqueue_scripts', 'pssx_blocked_ips_inline_style' );
 }
 
 add_action( 'init', 'pssx_init_plugin' );

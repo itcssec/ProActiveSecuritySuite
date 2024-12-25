@@ -283,9 +283,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Upgrade Notice ==
 
-= 1.5.8 =
+= 1.5.9 =
 
-Code refactoring.
+Minor fixes
 
 == Changelog ==
 
@@ -460,6 +460,10 @@ Introducing Traffic Insights, our newest premium feature that provides a single-
 = 1.5.8 =
 
 Code refactoring.
+
+= 1.5.9 =
+
+Minor fixes. 
 
 
 == External Services ==
