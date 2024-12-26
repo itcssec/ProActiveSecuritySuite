@@ -307,6 +307,7 @@
 <h2 id="support">External Services</h2>
 
 <p>
+    
 **Cloudflare**  
 - **Usage**: We send visitor IPs (and optionally country/ISP data) to create Firewall rules.  
 - **Data Sent**: IP address, associated rule details.  
