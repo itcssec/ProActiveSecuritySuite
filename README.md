@@ -316,13 +316,13 @@
 **AbuseIPDB**  
 - **Usage**: We check IP reputation, fetching country code, ISP, and confidence score.  
 - **Data Sent**: IP address.  
-- [AbuseIPDB Terms of Service](https://www.abuseipdb.com/terms.html) | [Privacy Policy](https://www.abuseipdb.com/privacy.html)
+- [AbuseIPDB Terms of Service](https://www.abuseipdb.com/legal) | [Privacy Policy](https://www.abuseipdb.com/privacy)
 
 **WhatIsMyBrowser**  
 - **Usage**: We send user agent strings to detect software (browser), OS, and if it’s abusive.  
 - **Data Sent**: User agent strings.  
-- [WhatIsMyBrowser Terms of Service](https://developers.whatismybrowser.com/api/terms/) |
-  [Privacy Policy](https://developers.whatismybrowser.com/api/privacy-policy)
+- [WhatIsMyBrowser Terms of Service](https://developers.whatismybrowser.com/api/about/legal/) |
+  [Legal](https://developers.whatismybrowser.com/api/about/legal/)
 
 **IPData**  
 - **Usage**: We fetch detailed threat intelligence (Tor, proxy, known attacker, etc.).  
