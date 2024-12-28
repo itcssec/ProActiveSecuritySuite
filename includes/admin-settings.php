@@ -130,23 +130,23 @@ function pssx_render_settings_tab() {
         wp_die( 'Access is not allowed.' );
     }
     if ( isset( $_POST['pssx_settings_submit'] ) && check_admin_referer( 'pssx_settings_action', 'pssx_settings_nonce' ) ) {
-        $cloudflare_email = sanitize_email( $_POST['cloudflare_email'] );
-        $cloudflare_key_input = sanitize_text_field( $_POST['cloudflare_key'] );
-        $cloudflare_zone_id = sanitize_text_field( $_POST['cloudflare_zone_id'] );
-        $cloudflare_account_id = sanitize_text_field( $_POST['cloudflare_account_id'] );
-        $abuseipdb_api_id_input = sanitize_text_field( $_POST['abuseipdb_api_id'] );
+        $cloudflare_email = sanitize_email( $_POST['pssx_cloudflare_email'] );
+        $cloudflare_key_input = sanitize_text_field( $_POST['pssx_cloudflare_key'] );
+        $cloudflare_zone_id = sanitize_text_field( $_POST['pssx_cloudflare_zone_id'] );
+        $cloudflare_account_id = sanitize_text_field( $_POST['pssx_cloudflare_account_id'] );
+        $abuseipdb_api_id_input = sanitize_text_field( $_POST['pssx_abuseipdb_api_key'] );
         $blocked_hits_threshold = intval( $_POST['pssx_blocked_hits_threshold'] );
         $block_scope = sanitize_text_field( $_POST['pssx_block_scope'] );
         $block_mode = sanitize_text_field( $_POST['pssx_block_mode'] );
         $cron_interval = sanitize_text_field( $_POST['cron_interval'] );
-        update_option( 'cloudflare_email', $cloudflare_email );
+        update_option( 'pssx_cloudflare_email', $cloudflare_email );
         if ( !empty( $cloudflare_key_input ) && $cloudflare_key_input !== str_repeat( '*', 10 ) ) {
-            update_option( 'cloudflare_key', $cloudflare_key_input );
+            update_option( 'pssx_cloudflare_key', $cloudflare_key_input );
         }
-        update_option( 'cloudflare_zone_id', $cloudflare_zone_id );
-        update_option( 'cloudflare_account_id', $cloudflare_account_id );
+        update_option( 'pssx_cloudflare_zone_id', $cloudflare_zone_id );
+        update_option( 'pssx_cloudflare_account_id', $cloudflare_account_id );
         if ( !empty( $abuseipdb_api_id_input ) && $abuseipdb_api_id_input !== str_repeat( '*', 10 ) ) {
-            update_option( 'abuseipdb_api_id', $abuseipdb_api_id_input );
+            update_option( 'pssx_abuseipdb_api_key', $abuseipdb_api_id_input );
         }
         $pssx_enable_abuseipdb = ( isset( $_POST['pssx_enable_abuseipdb'] ) ? 'yes' : 'no' );
         update_option( 'pssx_enable_abuseipdb', $pssx_enable_abuseipdb );
@@ -162,11 +162,11 @@ function pssx_render_settings_tab() {
             'updated'
         );
     }
-    $cloudflare_email = get_option( 'cloudflare_email', '' );
-    $cloudflare_key = get_option( 'cloudflare_key', '' );
-    $cloudflare_zone_id = get_option( 'cloudflare_zone_id', '' );
-    $cloudflare_account_id = get_option( 'cloudflare_account_id', '' );
-    $abuseipdb_api_id = get_option( 'abuseipdb_api_id', '' );
+    $cloudflare_email = get_option( 'pssx_cloudflare_email', '' );
+    $cloudflare_key = get_option( 'pssx_cloudflare_key', '' );
+    $cloudflare_zone_id = get_option( 'pssx_cloudflare_zone_id', '' );
+    $cloudflare_account_id = get_option( 'pssx_cloudflare_account_id', '' );
+    $abuseipdb_api_id = get_option( 'pssx_abuseipdb_api_key', '' );
     $whatismybr_api_id = get_option( 'whatismybr_api_id', '' );
     $blocked_hits_threshold = get_option( 'pssx_blocked_hits_threshold', 0 );
     $block_scope = get_option( 'pssx_block_scope', 'domain' );
@@ -197,7 +197,7 @@ function pssx_render_settings_tab() {
                     <th scope="row"><?php 
     esc_html_e( 'Cloudflare Email', 'proactive-security-suite' );
     ?></th>
-                    <td><input type="email" name="cloudflare_email" value="<?php 
+                    <td><input type="email" name="pssx_cloudflare_email" value="<?php 
     echo esc_attr( $cloudflare_email );
     ?>" /></td>
                 </tr>
@@ -205,7 +205,7 @@ function pssx_render_settings_tab() {
                     <th scope="row"><?php 
     esc_html_e( 'Cloudflare Key', 'proactive-security-suite' );
     ?></th>
-                    <td><input type="password" name="cloudflare_key" value="<?php 
+                    <td><input type="password" name="pssx_cloudflare_key" value="<?php 
     echo esc_attr( str_repeat( '*', 10 ) );
     ?>" /></td>
                 </tr>
@@ -213,7 +213,7 @@ function pssx_render_settings_tab() {
                     <th scope="row"><?php 
     esc_html_e( 'Cloudflare Zone ID', 'proactive-security-suite' );
     ?></th>
-                    <td><input type="text" name="cloudflare_zone_id" value="<?php 
+                    <td><input type="text" name="pssx_cloudflare_zone_id" value="<?php 
     echo esc_attr( $cloudflare_zone_id );
     ?>" /></td>
                 </tr>
@@ -221,7 +221,7 @@ function pssx_render_settings_tab() {
                     <th scope="row"><?php 
     esc_html_e( 'Cloudflare Account ID', 'proactive-security-suite' );
     ?></th>
-                    <td><input type="text" name="cloudflare_account_id" value="<?php 
+                    <td><input type="text" name="pssx_cloudflare_account_id" value="<?php 
     echo esc_attr( $cloudflare_account_id );
     ?>" /></td>
                 </tr>
@@ -235,13 +235,13 @@ function pssx_render_settings_tab() {
                         <?php 
     if ( !empty( $abuseipdb_api_id ) ) {
         ?>
-                            <input type="password" name="abuseipdb_api_id" value="<?php 
+                            <input type="password" name="pssx_abuseipdb_api_key" value="<?php 
         echo esc_attr( str_repeat( '*', 10 ) );
         ?>" />
                         <?php 
     } else {
         ?>
-                            <input type="password" name="abuseipdb_api_id" value="" />
+                            <input type="password" name="pssx_abuseipdb_api_key" value="" />
                         <?php 
     }
     ?>

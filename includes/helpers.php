@@ -72,4 +72,3 @@ function pssx_custom_cron_schedules( $schedules ) {
     return $schedules;
 }
 add_filter( 'cron_schedules', 'pssx_custom_cron_schedules' );
-
