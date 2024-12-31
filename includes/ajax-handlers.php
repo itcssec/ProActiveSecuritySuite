@@ -13,14 +13,14 @@ function pssx_delete_ips() {
         wp_die();
     }
 
-    // CHANGED: Now we properly sanitize + validate arrays
+    // Sanitize + validate arrays
     $ips_raw = isset( $_POST['ids'] ) ? (array) wp_unslash( $_POST['ids'] ) : array();
-    $ids = array_map( 'absint', $ips_raw ); // ensure numeric only
+    $ids     = array_map( 'absint', $ips_raw );
 
-    // Filter out any 0 or negative (in case they are invalid):
+    // Filter out any zero or negative
     $ids = array_filter( $ids, function( $id ) {
         return $id > 0;
-    });
+    } );
 
     if ( empty( $ids ) ) {
         wp_send_json_error( 'No valid IDs provided.' );
@@ -28,25 +28,31 @@ function pssx_delete_ips() {
     }
 
     global $wpdb;
+    // Construct the table name. The $wpdb->prefix is already considered safe.
     $table_name = $wpdb->prefix . 'pssx_blocked_ips';
-    $table_name_esc = esc_sql( $table_name );
 
-    // CHANGED: Using a direct wpdb->prepare with placeholders
-    // Build placeholders: "(%d, %d, %d, ... )"
+    // Build placeholders for the IDs: e.g. "%d, %d, %d"
     $placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
-    $sql = "DELETE FROM `{$table_name_esc}` WHERE id IN ($placeholders)";
 
-    $prepared_query = $wpdb->prepare( $sql, $ids );
-    $result = $wpdb->query( $prepared_query );
+    // Build and prepare the SQL in one step, then query in one go.
+    // The table name is concatenated as a literal string, since placeholders
+    // only work for data, not for identifiers (e.g. table names).
+    $result = $wpdb->query(
+        $wpdb->prepare(
+            "DELETE FROM `{$table_name}` WHERE id IN ({$placeholders})",
+            $ids
+        )
+    );
 
     if ( false === $result ) {
         wp_send_json_error( 'Database error occurred.' );
-        wp_die();
     } else {
         wp_send_json_success( 'Selected records deleted successfully from the database.' );
-        wp_die();
     }
+
+    wp_die();
 }
+
 add_action( 'wp_ajax_pssx_delete_ips', 'pssx_delete_ips' );
 
 // AJAX handler for deleting IPs from Cloudflare.
