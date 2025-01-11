@@ -48,7 +48,7 @@ function pssx_update_cron_schedule() {
     // Clear any existing scheduled events.
     wp_clear_scheduled_hook( 'pssx_check_new_blocked_ips' );
 
-    $cron_interval = get_option( 'cron_interval', 'hourly' );
+    $cron_interval = get_option( 'pssx_cron_interval', 'hourly' );
 
     if ( $cron_interval !== 'none' ) {
         wp_schedule_event( time(), $cron_interval, 'pssx_check_new_blocked_ips' );

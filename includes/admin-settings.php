@@ -33,7 +33,20 @@ function pssx_render_admin_page() {
     if ( !current_user_can( 'manage_options' ) ) {
         wp_die( 'Access is not allowed.' );
     }
-    $active_tab = ( isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'pss-settings' );
+    // Build the base URL for our settings page.
+    $base_url = admin_url( 'options-general.php?page=pss-settings' );
+    // Generate nonce-protected links for each tab:
+    $settings_tab_url = wp_nonce_url( add_query_arg( array(
+        'tab' => 'pss-settings',
+    ), $base_url ), 'pssx_tab_switch', 'pssx_tab_nonce' );
+    $ips_tab_url = wp_nonce_url( add_query_arg( array(
+        'tab' => 'pssx-ips',
+    ), $base_url ), 'pssx_tab_switch', 'pssx_tab_nonce' );
+    // Default tab is pss-settings, only use $_GET['tab'] if nonce is valid.
+    $active_tab = 'pss-settings';
+    if ( isset( $_GET['tab'], $_GET['pssx_tab_nonce'] ) && check_admin_referer( 'pssx_tab_switch', 'pssx_tab_nonce' ) ) {
+        $active_tab = sanitize_text_field( wp_unslash( $_GET['tab'] ) );
+    }
     ?>
     <div class="wrap">
         <h1><?php 
@@ -41,7 +54,9 @@ function pssx_render_admin_page() {
     ?></h1>
 
         <h2 class="nav-tab-wrapper">
-            <a href="?page=pss-settings"
+            <a href="<?php 
+    echo esc_url( $settings_tab_url );
+    ?>"
                class="nav-tab <?php 
     echo ( $active_tab === 'pss-settings' ? 'nav-tab-active' : '' );
     ?>">
@@ -49,7 +64,9 @@ function pssx_render_admin_page() {
     esc_html_e( 'Settings', 'proactive-security-suite' );
     ?>
             </a>
-            <a href="?page=pss-settings&tab=pssx-ips"
+            <a href="<?php 
+    echo esc_url( $ips_tab_url );
+    ?>"
                class="nav-tab <?php 
     echo ( $active_tab === 'pssx-ips' ? 'nav-tab-active' : '' );
     ?>">
@@ -129,16 +146,45 @@ function pssx_render_settings_tab() {
     if ( !current_user_can( 'manage_options' ) ) {
         wp_die( 'Access is not allowed.' );
     }
-    if ( isset( $_POST['pssx_settings_submit'] ) && check_admin_referer( 'pssx_settings_action', 'pssx_settings_nonce' ) ) {
-        $cloudflare_email = sanitize_email( $_POST['pssx_cloudflare_email'] );
-        $cloudflare_key_input = sanitize_text_field( $_POST['pssx_cloudflare_key'] );
-        $cloudflare_zone_id = sanitize_text_field( $_POST['pssx_cloudflare_zone_id'] );
-        $cloudflare_account_id = sanitize_text_field( $_POST['pssx_cloudflare_account_id'] );
-        $abuseipdb_api_id_input = sanitize_text_field( $_POST['pssx_abuseipdb_api_key'] );
-        $blocked_hits_threshold = intval( $_POST['pssx_blocked_hits_threshold'] );
-        $block_scope = sanitize_text_field( $_POST['pssx_block_scope'] );
-        $block_mode = sanitize_text_field( $_POST['pssx_block_mode'] );
-        $cron_interval = sanitize_text_field( $_POST['cron_interval'] );
+    // Check form submission with nonce.
+    if ( isset( $_POST['pssx_settings_submit'] ) && isset( $_POST['pssx_settings_nonce'] ) && check_admin_referer( 'pssx_settings_action', 'pssx_settings_nonce' ) ) {
+        // Use wp_unslash() before sanitizing.
+        $cloudflare_email = '';
+        if ( isset( $_POST['pssx_cloudflare_email'] ) ) {
+            $cloudflare_email = sanitize_email( wp_unslash( $_POST['pssx_cloudflare_email'] ) );
+        }
+        $cloudflare_key_input = '';
+        if ( isset( $_POST['pssx_cloudflare_key'] ) ) {
+            $cloudflare_key_input = sanitize_text_field( wp_unslash( $_POST['pssx_cloudflare_key'] ) );
+        }
+        $cloudflare_zone_id = '';
+        if ( isset( $_POST['pssx_cloudflare_zone_id'] ) ) {
+            $cloudflare_zone_id = sanitize_text_field( wp_unslash( $_POST['pssx_cloudflare_zone_id'] ) );
+        }
+        $cloudflare_account_id = '';
+        if ( isset( $_POST['pssx_cloudflare_account_id'] ) ) {
+            $cloudflare_account_id = sanitize_text_field( wp_unslash( $_POST['pssx_cloudflare_account_id'] ) );
+        }
+        $abuseipdb_api_id_input = '';
+        if ( isset( $_POST['pssx_abuseipdb_api_key'] ) ) {
+            $abuseipdb_api_id_input = sanitize_text_field( wp_unslash( $_POST['pssx_abuseipdb_api_key'] ) );
+        }
+        $blocked_hits_threshold = 0;
+        if ( isset( $_POST['pssx_blocked_hits_threshold'] ) ) {
+            $blocked_hits_threshold = intval( wp_unslash( $_POST['pssx_blocked_hits_threshold'] ) );
+        }
+        $block_scope = '';
+        if ( isset( $_POST['pssx_block_scope'] ) ) {
+            $block_scope = sanitize_text_field( wp_unslash( $_POST['pssx_block_scope'] ) );
+        }
+        $block_mode = '';
+        if ( isset( $_POST['pssx_block_mode'] ) ) {
+            $block_mode = sanitize_text_field( wp_unslash( $_POST['pssx_block_mode'] ) );
+        }
+        $cron_interval = '';
+        if ( isset( $_POST['pssx_cron_interval'] ) ) {
+            $cron_interval = sanitize_text_field( wp_unslash( $_POST['pssx_cron_interval'] ) );
+        }
         update_option( 'pssx_cloudflare_email', $cloudflare_email );
         if ( !empty( $cloudflare_key_input ) && $cloudflare_key_input !== str_repeat( '*', 10 ) ) {
             update_option( 'pssx_cloudflare_key', $cloudflare_key_input );
@@ -153,7 +199,7 @@ function pssx_render_settings_tab() {
         update_option( 'pssx_blocked_hits_threshold', $blocked_hits_threshold );
         update_option( 'pssx_block_scope', $block_scope );
         update_option( 'pssx_block_mode', $block_mode );
-        update_option( 'cron_interval', $cron_interval );
+        update_option( 'pssx_cron_interval', $cron_interval );
         pssx_update_cron_schedule();
         add_settings_error(
             'pssx_settings',
@@ -162,6 +208,7 @@ function pssx_render_settings_tab() {
             'updated'
         );
     }
+    // Retrieve existing settings (unchanged).
     $cloudflare_email = get_option( 'pssx_cloudflare_email', '' );
     $cloudflare_key = get_option( 'pssx_cloudflare_key', '' );
     $cloudflare_zone_id = get_option( 'pssx_cloudflare_zone_id', '' );
@@ -171,7 +218,7 @@ function pssx_render_settings_tab() {
     $blocked_hits_threshold = get_option( 'pssx_blocked_hits_threshold', 0 );
     $block_scope = get_option( 'pssx_block_scope', 'domain' );
     $block_mode = get_option( 'pssx_block_mode', 'block' );
-    $cron_interval = get_option( 'cron_interval', 'hourly' );
+    $cron_interval = get_option( 'pssx_cron_interval', 'hourly' );
     $pssx_last_processed_time = get_option( 'pssx_last_processed_time', '' );
     $pssx_processed_ips_count = get_option( 'pssx_processed_ips_count', 0 );
     $pssx_enable_traffic_capture = get_option( 'pssx_enable_traffic_capture', 'yes' );
@@ -323,14 +370,18 @@ function pssx_render_settings_tab() {
                         <select name="pssx_block_scope">
                             <option value="domain" <?php 
     selected( 'domain', $block_scope );
-    ?>><?php 
+    ?>>
+                                <?php 
     esc_html_e( 'Domain Specific', 'proactive-security-suite' );
-    ?></option>
+    ?>
+                            </option>
                             <option value="account" <?php 
     selected( 'account', $block_scope );
-    ?>><?php 
+    ?>>
+                                <?php 
     esc_html_e( 'Entire Account', 'proactive-security-suite' );
-    ?></option>
+    ?>
+                            </option>
                         </select>
                     </td>
                 </tr>
@@ -344,14 +395,18 @@ function pssx_render_settings_tab() {
                         <select name="pssx_block_mode">
                             <option value="block" <?php 
     selected( 'block', $block_mode );
-    ?>><?php 
+    ?>>
+                                <?php 
     esc_html_e( 'Block', 'proactive-security-suite' );
-    ?></option>
+    ?>
+                            </option>
                             <option value="managed_challenge" <?php 
     selected( 'managed_challenge', $block_mode );
-    ?>><?php 
+    ?>>
+                                <?php 
     esc_html_e( 'Managed Challenge', 'proactive-security-suite' );
-    ?></option>
+    ?>
+                            </option>
                         </select>
                     </td>
                 </tr>
@@ -362,37 +417,49 @@ function pssx_render_settings_tab() {
     esc_html_e( 'Cron Interval', 'proactive-security-suite' );
     ?></th>
                     <td>
-                        <select name="cron_interval">
+                        <select name="pssx_cron_interval">
                             <option value="none" <?php 
     selected( 'none', $cron_interval );
-    ?>><?php 
+    ?>>
+                                <?php 
     esc_html_e( 'Not Set', 'proactive-security-suite' );
-    ?></option>
+    ?>
+                            </option>
                             <option value="1min" <?php 
     selected( '1min', $cron_interval );
-    ?>><?php 
+    ?>>
+                                <?php 
     esc_html_e( 'Every Minute', 'proactive-security-suite' );
-    ?></option>
+    ?>
+                            </option>
                             <option value="5min" <?php 
     selected( '5min', $cron_interval );
-    ?>><?php 
+    ?>>
+                                <?php 
     esc_html_e( 'Every 5 Minutes', 'proactive-security-suite' );
-    ?></option>
+    ?>
+                            </option>
                             <option value="hourly" <?php 
     selected( 'hourly', $cron_interval );
-    ?>><?php 
+    ?>>
+                                <?php 
     esc_html_e( '1 hour', 'proactive-security-suite' );
-    ?></option>
+    ?>
+                            </option>
                             <option value="twicedaily" <?php 
     selected( 'twicedaily', $cron_interval );
-    ?>><?php 
+    ?>>
+                                <?php 
     esc_html_e( '12 hours', 'proactive-security-suite' );
-    ?></option>
+    ?>
+                            </option>
                             <option value="daily" <?php 
     selected( 'daily', $cron_interval );
-    ?>><?php 
+    ?>>
+                                <?php 
     esc_html_e( '24 hours', 'proactive-security-suite' );
-    ?></option>
+    ?>
+                            </option>
                         </select>
                     </td>
                 </tr>
@@ -455,13 +522,15 @@ function pssx_render_settings_tab() {
     <?php 
 }
 
-// The following handle forms for deleting data or running processes (renamed or left as-is except for prefix changes in function).
+// The following handle forms for deleting data or running processes.
 function pssx_handle_delete_captured_traffic_action() {
-    if ( isset( $_POST['action'] ) && $_POST['action'] === 'pssx_delete_captured_traffic' && check_admin_referer( 'pssx_delete_captured_traffic', 'pssx_delete_nonce' ) ) {
+    if ( isset( $_POST['action'] ) && 'pssx_delete_captured_traffic' === $_POST['action'] && check_admin_referer( 'pssx_delete_captured_traffic', 'pssx_delete_nonce' ) ) {
         wp_die( 'Access is not allowed.' );
         global $wpdb;
+        // Escape the table name for direct SQL.
         $table_name = $wpdb->prefix . 'pssx_traffic_data';
-        $wpdb->query( "TRUNCATE TABLE {$table_name}" );
+        $table_name_esc = esc_sql( $table_name );
+        $wpdb->query( "TRUNCATE TABLE `{$table_name_esc}`" );
         $redirect_url = add_query_arg( 'pssx_message', 'deleted', admin_url( 'options-general.php?page=pss-settings&tab=pssx-traffic' ) );
         wp_safe_redirect( $redirect_url );
         exit;
@@ -515,35 +584,35 @@ function pssx_render_rule_builder_tab() {
     if ( isset( $_POST['pssx_add_rule_nonce'] ) && check_admin_referer( 'pssx_add_rule_action', 'pssx_add_rule_nonce' ) ) {
         $criteria = array();
         // Confidence Score
-        if ( !empty( $_POST['confidence_score_operator'] ) && isset( $_POST['confidence_score_value'] ) && $_POST['confidence_score_value'] !== '' ) {
-            $operator = sanitize_text_field( $_POST['confidence_score_operator'] );
-            $value = intval( $_POST['confidence_score_value'] );
+        if ( !empty( $_POST['confidence_score_operator'] ) && isset( $_POST['confidence_score_value'] ) && '' !== $_POST['confidence_score_value'] ) {
+            $operator = sanitize_text_field( wp_unslash( $_POST['confidence_score_operator'] ) );
+            $value = intval( wp_unslash( $_POST['confidence_score_value'] ) );
             $criteria['confidence_score'] = array(
                 'operator' => $operator,
                 'value'    => $value,
             );
         }
         // is_whitelisted
-        if ( isset( $_POST['is_whitelisted'] ) && $_POST['is_whitelisted'] !== '' ) {
-            $criteria['is_whitelisted'] = sanitize_text_field( $_POST['is_whitelisted'] );
+        if ( isset( $_POST['is_whitelisted'] ) && '' !== $_POST['is_whitelisted'] ) {
+            $criteria['is_whitelisted'] = sanitize_text_field( wp_unslash( $_POST['is_whitelisted'] ) );
         }
         // is_abusive
-        if ( isset( $_POST['is_abusive'] ) && $_POST['is_abusive'] !== '' ) {
-            $criteria['is_abusive'] = sanitize_text_field( $_POST['is_abusive'] );
+        if ( isset( $_POST['is_abusive'] ) && '' !== $_POST['is_abusive'] ) {
+            $criteria['is_abusive'] = sanitize_text_field( wp_unslash( $_POST['is_abusive'] ) );
         }
         // operating_system
-        if ( isset( $_POST['operating_system_operator'] ) && isset( $_POST['operating_system_value'] ) && $_POST['operating_system_value'] !== '' ) {
-            $op = sanitize_text_field( $_POST['operating_system_operator'] );
-            $val = sanitize_text_field( $_POST['operating_system_value'] );
+        if ( isset( $_POST['operating_system_operator'], $_POST['operating_system_value'] ) && '' !== $_POST['operating_system_value'] ) {
+            $op = sanitize_text_field( wp_unslash( $_POST['operating_system_operator'] ) );
+            $val = sanitize_text_field( wp_unslash( $_POST['operating_system_value'] ) );
             $criteria['operating_system'] = array(
                 'operator' => $op,
                 'value'    => $val,
             );
         }
         // software
-        if ( isset( $_POST['software_operator'] ) && isset( $_POST['software_value'] ) && $_POST['software_value'] !== '' ) {
-            $op = sanitize_text_field( $_POST['software_operator'] );
-            $val = sanitize_text_field( $_POST['software_value'] );
+        if ( isset( $_POST['software_operator'], $_POST['software_value'] ) && '' !== $_POST['software_value'] ) {
+            $op = sanitize_text_field( wp_unslash( $_POST['software_operator'] ) );
+            $val = sanitize_text_field( wp_unslash( $_POST['software_value'] ) );
             $criteria['software'] = array(
                 'operator' => $op,
                 'value'    => $val,
@@ -562,16 +631,22 @@ function pssx_render_rule_builder_tab() {
             'ipdata_is_bogon'
         );
         foreach ( $threat_fields as $field ) {
-            if ( isset( $_POST[$field] ) && $_POST[$field] !== '' ) {
-                $criteria[$field] = sanitize_text_field( $_POST[$field] );
+            if ( isset( $_POST[$field] ) && '' !== $_POST[$field] ) {
+                $criteria[$field] = sanitize_text_field( wp_unslash( $_POST[$field] ) );
             }
         }
-        $action = sanitize_text_field( $_POST['action'] );
-        $priority = intval( $_POST['priority'] );
+        $action = '';
+        if ( isset( $_POST['action'] ) ) {
+            $action = sanitize_text_field( wp_unslash( $_POST['action'] ) );
+        }
+        $priority = 0;
+        if ( isset( $_POST['priority'] ) && '' !== $_POST['priority'] ) {
+            $priority = intval( wp_unslash( $_POST['priority'] ) );
+        }
         global $wpdb;
         $rules_table = $wpdb->prefix . 'pssx_rules';
-        // (We didn’t rename this table file reference to keep minimal changes, or rename it as well if you wish.)
-        $wpdb->insert( $rules_table, array(
+        $rules_table_esc = esc_sql( $rules_table );
+        $wpdb->insert( $rules_table_esc, array(
             'criteria' => wp_json_encode( $criteria ),
             'action'   => $action,
             'priority' => $priority,
@@ -580,11 +655,12 @@ function pssx_render_rule_builder_tab() {
         exit;
     }
     // Handle deletion of a rule.
-    if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete_rule' && isset( $_GET['rule_id'] ) && check_admin_referer( 'pssx_delete_rule_nonce', '_wpnonce' ) ) {
+    if ( isset( $_GET['action'], $_GET['rule_id'] ) && 'delete_rule' === $_GET['action'] && check_admin_referer( 'pssx_delete_rule_nonce', '_wpnonce' ) ) {
         $rule_id = intval( $_GET['rule_id'] );
         global $wpdb;
         $rules_table = $wpdb->prefix . 'pssx_rules';
-        $wpdb->delete( $rules_table, array(
+        $rules_table_esc = esc_sql( $rules_table );
+        $wpdb->delete( $rules_table_esc, array(
             'id' => $rule_id,
         ), array('%d') );
         wp_redirect( add_query_arg( 'message', 'rule_deleted', admin_url( 'options-general.php?page=pss-settings&tab=pssx-rules' ) ) );
@@ -592,11 +668,12 @@ function pssx_render_rule_builder_tab() {
     }
     global $wpdb;
     $rules_table = $wpdb->prefix . 'pssx_rules';
-    $rules = $wpdb->get_results( "SELECT * FROM {$rules_table} ORDER BY priority DESC" );
+    $rules_table_esc = esc_sql( $rules_table );
+    $rules = $wpdb->get_results( "SELECT * FROM `{$rules_table_esc}` ORDER BY priority DESC" );
     if ( isset( $_GET['message'] ) ) {
-        if ( $_GET['message'] === 'rule_added' ) {
+        if ( 'rule_added' === $_GET['message'] ) {
             echo '<div class="notice notice-success"><p>' . esc_html__( 'Rule added successfully.', 'proactive-security-suite' ) . '</p></div>';
-        } elseif ( $_GET['message'] === 'rule_deleted' ) {
+        } elseif ( 'rule_deleted' === $_GET['message'] ) {
             echo '<div class="notice notice-success"><p>' . esc_html__( 'Rule deleted successfully.', 'proactive-security-suite' ) . '</p></div>';
         }
     }
@@ -633,7 +710,6 @@ function pssx_render_rule_builder_tab() {
         ?>
                 <?php 
         foreach ( $rules as $rule ) {
-            $criteria = json_decode( $rule->criteria, true );
             ?>
                     <tr>
                         <td><?php 
@@ -641,14 +717,17 @@ function pssx_render_rule_builder_tab() {
             ?></td>
                         <td>
                             <?php 
-            foreach ( $criteria as $key => $value ) {
-                echo esc_html( ucfirst( str_replace( '_', ' ', $key ) ) ) . ': ';
-                if ( is_array( $value ) ) {
-                    echo esc_html( $value['operator'] . ' ' . $value['value'] );
-                } else {
-                    echo esc_html( $value );
+            $criteria = json_decode( $rule->criteria, true );
+            if ( !empty( $criteria ) && is_array( $criteria ) ) {
+                foreach ( $criteria as $key => $value ) {
+                    echo esc_html( ucfirst( str_replace( '_', ' ', $key ) ) ) . ': ';
+                    if ( is_array( $value ) && isset( $value['operator'], $value['value'] ) ) {
+                        echo esc_html( $value['operator'] . ' ' . $value['value'] );
+                    } else {
+                        echo esc_html( $value );
+                    }
+                    echo '<br>';
                 }
-                echo '<br>';
             }
             ?>
                         </td>

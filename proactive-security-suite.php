@@ -1,11 +1,11 @@
 <?php
 
 /*
-Plugin Name: Proactive Security Suite PremiumPlus
+Plugin Name: Proactive Security Suite
 Description: Enhance your WordPress website’s security with the ProActive Security Suite. This powerful plugin offers advanced security features including automatic IP blocking, an advanced rule builder, traffic analysis, and seamless integration with services like Cloudflare, AbuseIPDB, and Whatismybrowser.com. ProActive Security Suite provides proactive defense mechanisms to protect your site from malicious traffic and potential threats before they reach your server.
-Version: 1.5.9
+Version: 1.5.9.1
 Author: ITCS
-Author URI: https://itcs.services
+Author URI: https://github.com/itcssec/ProActiveSecuritySuite
 License: GPLv2 or later
 Text Domain: proactive-security-suite
 */
