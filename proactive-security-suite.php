@@ -3,7 +3,7 @@
 /*
 Plugin Name: Proactive Security Suite
 Description: Enhance your WordPress website’s security with the ProActive Security Suite. This powerful plugin offers advanced security features including automatic IP blocking, an advanced rule builder, traffic analysis, and seamless integration with services like Cloudflare, AbuseIPDB, and Whatismybrowser.com. ProActive Security Suite provides proactive defense mechanisms to protect your site from malicious traffic and potential threats before they reach your server.
-Version: 1.5.9.1
+Version: 1.5.9.2
 Author: ITCS
 Author URI: https://github.com/itcssec/ProActiveSecuritySuite
 License: GPLv2 or later
@@ -14,13 +14,13 @@ if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
 // Include Freemius SDK.
-if ( !function_exists( 'wor_fs' ) ) {
-    function wor_fs() {
-        global $wor_fs;
-        if ( !isset( $wor_fs ) ) {
+if ( !function_exists( 'pssx_fs' ) ) {
+    function pssx_fs() {
+        global $pssx_fs;
+        if ( !isset( $pssx_fs ) ) {
             // Include Freemius SDK.
             require_once dirname( __FILE__ ) . '/vendor/freemius/start.php';
-            $wor_fs = fs_dynamic_init( array(
+            $pssx_fs = fs_dynamic_init( array(
                 'id'             => '13207',
                 'slug'           => 'proactive-security-suite',
                 'type'           => 'plugin',
@@ -39,11 +39,11 @@ if ( !function_exists( 'wor_fs' ) ) {
                 'is_live'        => true,
             ) );
         }
-        return $wor_fs;
+        return $pssx_fs;
     }
 
-    wor_fs();
-    do_action( 'wor_fs_loaded' );
+    pssx_fs();
+    do_action( 'pssx_fs_loaded' );
 }
 // Define plugin constants.
 define( 'PSSX_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
