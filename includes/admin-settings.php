@@ -41,7 +41,7 @@ add_action( 'admin_menu', 'pssx_menu' );
  */
 function pssx_render_admin_page() {
     if ( ! current_user_can( 'manage_options' ) ) {
-        wp_die( __( 'Access is not allowed.', 'proactive-security-suite' ) );
+        wp_die( esc_html__( 'Access is not allowed.', 'proactive-security-suite' ) );
     }
 
     // Build the base URL for our settings page.
@@ -196,7 +196,7 @@ function pssx_render_traffic_insights_tab() {
  */
 function pssx_render_settings_tab() {
     if ( ! current_user_can( 'manage_options' ) ) {
-        wp_die( __( 'Access is not allowed.', 'proactive-security-suite' ) );
+        wp_die( esc_html__( 'Access is not allowed.', 'proactive-security-suite' ) );
     }
 
     // Check form submission with nonce.
@@ -609,7 +609,7 @@ function pssx_handle_delete_captured_traffic_action() {
     ) {
         // Check premium status
         if ( ! function_exists( 'pssx_fs' ) || ! pssx_fs()->is__premium_only() ) {
-            wp_die( __( 'Access is not allowed.', 'proactive-security-suite' ) );
+            wp_die( esc_html__( 'Access is not allowed.', 'proactive-security-suite' ) );
         }
         global $wpdb;
         $table_name = $wpdb->prefix . 'pssx_traffic_data';
@@ -697,7 +697,7 @@ add_action( 'admin_enqueue_scripts', 'pssx_admin_styles' );
  */
 function pssx_render_rule_builder_tab() {
     if ( ! current_user_can( 'manage_options' ) ) {
-        wp_die( __( 'Access is not allowed.', 'proactive-security-suite' ) );
+        wp_die( esc_html__( 'Access is not allowed.', 'proactive-security-suite' ) );
     }
 
     // Handle form submission for adding a new rule.
