@@ -261,11 +261,11 @@ function pssx_render_settings_tab() {
         if ( function_exists( 'pssx_fs' ) && pssx_fs()->is__premium_only() ) {
             // Premium fields
             $whatismybr_api_id_input = '';
-            if ( isset( $_POST['whatismybr_api_id'] ) ) {
-                $whatismybr_api_id_input = sanitize_text_field( wp_unslash( $_POST['whatismybr_api_id'] ) );
+            if ( isset( $_POST['pssx_whatismybr_api_id'] ) ) {
+                $whatismybr_api_id_input = sanitize_text_field( wp_unslash( $_POST['pssx_whatismybr_api_id'] ) );
             }
             if ( ! empty( $whatismybr_api_id_input ) && $whatismybr_api_id_input !== str_repeat( '*', 10 ) ) {
-                update_option( 'whatismybr_api_id', $whatismybr_api_id_input );
+                update_option( 'pssx_whatismybr_api_id', $whatismybr_api_id_input );
             }
 
             $pssx_enable_traffic_capture = isset( $_POST['pssx_enable_traffic_capture'] ) ? 'yes' : 'no';
@@ -275,11 +275,11 @@ function pssx_render_settings_tab() {
             update_option( 'pssx_enable_abuseipdb_lookup_traffic', $pssx_enable_abuseipdb_lookup_traffic );
 
             $ipdata_api_id_input = '';
-            if ( isset( $_POST['ipdata_api_id'] ) ) {
-                $ipdata_api_id_input = sanitize_text_field( wp_unslash( $_POST['ipdata_api_id'] ) );
+            if ( isset( $_POST['pssx_ipdata_api_id'] ) ) {
+                $ipdata_api_id_input = sanitize_text_field( wp_unslash( $_POST['pssx_ipdata_api_id'] ) );
             }
             if ( ! empty( $ipdata_api_id_input ) && $ipdata_api_id_input !== str_repeat( '*', 10 ) ) {
-                update_option( 'ipdata_api_id', $ipdata_api_id_input );
+                update_option( 'pssx_ipdata_api_id', $ipdata_api_id_input );
             }
 
             $pssx_enable_ipdata_lookup_traffic = isset( $_POST['pssx_enable_ipdata_lookup_traffic'] ) ? 'yes' : 'no';
@@ -310,7 +310,7 @@ function pssx_render_settings_tab() {
     $cloudflare_zone_id                 = get_option( 'pssx_cloudflare_zone_id', '' );
     $cloudflare_account_id              = get_option( 'pssx_cloudflare_account_id', '' );
     $abuseipdb_api_id                   = get_option( 'pssx_abuseipdb_api_key', '' );
-    $whatismybr_api_id                  = get_option( 'whatismybr_api_id', '' );
+    $whatismybr_api_id                  = get_option( 'pssx_whatismybr_api_id', '' );
     $blocked_hits_threshold             = get_option( 'pssx_blocked_hits_threshold', 0 );
     $block_scope                        = get_option( 'pssx_block_scope', 'domain' );
     $block_mode                         = get_option( 'pssx_block_mode', 'block' );
@@ -322,7 +322,7 @@ function pssx_render_settings_tab() {
     $pssx_enable_abuseipdb_lookup_traffic = get_option( 'pssx_enable_abuseipdb_lookup_traffic', 'no' );
     $pssx_excluded_roles               = get_option( 'pssx_excluded_roles', array() );
     $editable_roles                    = get_editable_roles();
-    $ipdata_api_id                     = get_option( 'ipdata_api_id', '' );
+    $ipdata_api_id                     = get_option( 'pssx_ipdata_api_id', '' );
     $pssx_enable_ipdata_lookup_traffic = get_option( 'pssx_enable_ipdata_lookup_traffic', 'no' );
 
     settings_errors( 'pssx_settings' );
@@ -388,10 +388,10 @@ function pssx_render_settings_tab() {
                         <th scope="row"><?php esc_html_e( 'WhatIsMyBrowser API Key', 'proactive-security-suite' ); ?></th>
                         <td>
                             <?php if ( ! empty( $whatismybr_api_id ) ) : ?>
-                                <input type="password" name="whatismybr_api_id"
+                                <input type="password" name="pssx_whatismybr_api_id"
                                        value="<?php echo esc_attr( str_repeat('*',10) ); ?>" />
                             <?php else : ?>
-                                <input type="password" name="whatismybr_api_id" value="" />
+                                <input type="password" name="pssx_whatismybr_api_id" value="" />
                             <?php endif; ?>
                         </td>
                     </tr>
@@ -419,10 +419,10 @@ function pssx_render_settings_tab() {
                         <th scope="row"><?php esc_html_e( 'IPData API Key', 'proactive-security-suite' ); ?></th>
                         <td>
                             <?php if ( ! empty( $ipdata_api_id ) ) : ?>
-                                <input type="password" name="ipdata_api_id"
+                                <input type="password" name="pssx_ipdata_api_id"
                                        value="<?php echo esc_attr( str_repeat('*', 10) ); ?>" />
                             <?php else : ?>
-                                <input type="password" name="ipdata_api_id" value="" />
+                                <input type="password" name="pssx_ipdata_api_id" value="" />
                             <?php endif; ?>
                         </td>
                     </tr>
