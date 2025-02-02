@@ -280,6 +280,8 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 == Screenshots ==
 
 1. The plugin main settings page
+2. The plugin main settings page
+3. The plugin rule-builder settings page
 
 == Upgrade Notice ==
 
