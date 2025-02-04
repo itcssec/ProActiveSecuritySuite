@@ -12,9 +12,9 @@ function pssx_fetch_and_store_blocked_ips() {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'pssx_blocked_ips';
-    $threshold  = intval( get_option( 'pssx_blocked_hits_threshold', 0 ) ); // FIXED: Updated option name to include prefix
+    $threshold  = intval( get_option( 'pssx_blocked_hits_threshold', 0 ) ); // Updated option name to include prefix
 
-    // Fetch blocked IPs from Wordfence tables
+    // Fetch blocked IPs from Wordfence tables.
     $blocked_ips = $wpdb->get_results(
         $wpdb->prepare(
             "SELECT IP, unixday as blockedTime, blockCount as blockedHits
@@ -31,11 +31,11 @@ function pssx_fetch_and_store_blocked_ips() {
 
     if ( $blocked_ips ) {
         foreach ( $blocked_ips as $ip ) {
-            // Convert binary IP to readable format
+            // Convert binary IP to readable format.
             $ip_address = inet_ntop( $ip->IP );
             $ip_address = preg_replace( '/^::ffff:/', '', $ip_address );
 
-            // Validate IP address
+            // Validate IP address.
             if ( filter_var( $ip_address, FILTER_VALIDATE_IP ) === false ) {
                 error_log( 'Invalid IP address: ' . $ip_address );
                 continue;
@@ -47,11 +47,11 @@ function pssx_fetch_and_store_blocked_ips() {
                     "SELECT * FROM `$table_name` WHERE `ip` = %s",
                     $ip_address
                 )
-            ); // FIXED: Prepared statement with placeholders
+            );
 
             if ( $existing_ip ) {
                 continue;
-            } else { // FIXED: Retained the else clause
+            } else {
                 $timestamp = intval( $ip->blockedTime );
                 $timezone  = get_option( 'timezone_string' );
                 if ( empty( $timezone ) ) {
@@ -62,10 +62,10 @@ function pssx_fetch_and_store_blocked_ips() {
                 $date->setTimezone( new DateTimeZone( $timezone ) );
                 $blocked_time = $date->format( 'Y-m-d H:i:s' );
 
-                // Retrieve block mode with prefix
-                $block_mode = sanitize_text_field( get_option( 'pssx_block_mode', 'block' ) ); // FIXED: Updated option name to include prefix and sanitized
+                // Retrieve block mode with prefix.
+                $block_mode = sanitize_text_field( get_option( 'pssx_block_mode', 'block' ) );
 
-                // Insert the new blocked IP into the custom table
+                // Insert the new blocked IP into the custom table.
                 $wpdb->insert(
                     $table_name,
                     array(
@@ -100,12 +100,12 @@ function pssx_update_cloudflare_response( $ip_id, $cf_response ) {
     $wpdb->update(
         $table_name,
         array(
-            'cfResponse' => sanitize_text_field( $cf_response ), // FIXED: Sanitized
+            'cfResponse' => sanitize_text_field( $cf_response ),
         ),
         array(
-            'id' => intval( $ip_id ), // FIXED: Ensured integer
+            'id' => intval( $ip_id ),
         ),
-        array( '%s' ), // Data format
+        array( '%s' ),
         array( '%d' )
     );
 }
@@ -118,32 +118,31 @@ function pssx_add_ips_to_cloudflare() {
 
     global $wpdb;
     $table_name      = $wpdb->prefix . 'pssx_blocked_ips';
-    $email           = sanitize_email( get_option( 'pssx_cloudflare_email' ) ); // FIXED: Updated option name and sanitized
-    $key             = sanitize_text_field( get_option( 'pssx_cloudflare_key' ) ); // FIXED: Updated option name and sanitized
-    $block_scope     = sanitize_text_field( get_option( 'pssx_block_scope', 'domain' ) ); // FIXED: Updated option name and sanitized
-    $block_mode      = sanitize_text_field( get_option( 'pssx_block_mode', 'block' ) ); // FIXED: Updated option name and sanitized
-    $zone_id         = sanitize_text_field( get_option( 'pssx_cloudflare_zone_id' ) ); // FIXED: Updated option name and sanitized
-    $account_id      = sanitize_text_field( get_option( 'pssx_cloudflare_account_id' ) ); // FIXED: Updated option name and sanitized
+    $email           = sanitize_email( get_option( 'pssx_cloudflare_email' ) );
+    $key             = sanitize_text_field( get_option( 'pssx_cloudflare_key' ) );
+    $block_scope     = sanitize_text_field( get_option( 'pssx_block_scope', 'domain' ) );
+    $block_mode      = sanitize_text_field( get_option( 'pssx_block_mode', 'block' ) );
+    $zone_id         = sanitize_text_field( get_option( 'pssx_cloudflare_zone_id' ) );
+    $account_id      = sanitize_text_field( get_option( 'pssx_cloudflare_account_id' ) );
     $ips_to_send     = $wpdb->get_results(
         $wpdb->prepare(
             "SELECT * FROM `$table_name` WHERE `isSent` = %d",
             0
         )
-    ); // FIXED: Prepared statement with placeholders
+    );
 
-    $pssx_enable_abuseipdb = sanitize_text_field( get_option( 'pssx_enable_abuseipdb', 'no' ) ); // FIXED: Sanitized
-    $abuseipdb_api_key     = sanitize_text_field( get_option( 'pssx_abuseipdb_api_key', '' ) );   // FIXED: Updated option name and sanitized
+    $pssx_enable_abuseipdb = sanitize_text_field( get_option( 'pssx_enable_abuseipdb', 'no' ) );
+    $abuseipdb_api_key     = sanitize_text_field( get_option( 'pssx_abuseipdb_api_key', '' ) );
 
-    $processed_ips_count = 0; // Initialize counter
+    $processed_ips_count = 0;
 
     if ( $ips_to_send ) {
         foreach ( $ips_to_send as $ip ) {
-            $ip_address = sanitize_text_field( $ip->ip ); // FIXED: Sanitized
-            $block_mode = sanitize_text_field( $ip->block_mode ); // FIXED: Sanitized
+            $ip_address = sanitize_text_field( $ip->ip );
+            $block_mode = sanitize_text_field( $ip->block_mode );
 
-            // Perform AbuseIPDB lookup if enabled
+            // Perform AbuseIPDB lookup if enabled.
             if ( 'yes' === $pssx_enable_abuseipdb && ! empty( $abuseipdb_api_key ) ) {
-                // Perform the lookup
                 $request_url = 'https://api.abuseipdb.com/api/v2/check';
 
                 $args = array(
@@ -171,7 +170,6 @@ function pssx_add_ips_to_cloudflare() {
                         $isp              = sanitize_text_field( $body['data']['isp'] );
                         $confidence_score = intval( $body['data']['abuseConfidenceScore'] );
 
-                        // Update the database record
                         $wpdb->update(
                             $table_name,
                             array(
@@ -181,7 +179,7 @@ function pssx_add_ips_to_cloudflare() {
                                 'confidenceScore' => $confidence_score,
                             ),
                             array( 'id' => intval( $ip->id ) ),
-                            array( '%s', '%s', '%s', '%d' ), // FIXED: Correct format specifiers
+                            array( '%s', '%s', '%s', '%d' ),
                             array( '%d' )
                         );
                     } else {
@@ -190,7 +188,7 @@ function pssx_add_ips_to_cloudflare() {
                 }
             }
 
-            // Send IP to Cloudflare
+            // Send IP to Cloudflare.
             if ( 'domain' === $block_scope ) {
                 $api_url = "https://api.cloudflare.com/client/v4/zones/" . urlencode( $zone_id ) . "/firewall/access_rules/rules";
             } else {
@@ -204,7 +202,7 @@ function pssx_add_ips_to_cloudflare() {
                     'Content-Type' => 'application/json',
                 ),
                 'body'    => wp_json_encode( array(
-                    'mode'          => $block_mode, // Use the block_mode from the IP record
+                    'mode'          => $block_mode,
                     'configuration' => array(
                         'target' => 'ip',
                         'value'  => $ip_address,
@@ -228,7 +226,7 @@ function pssx_add_ips_to_cloudflare() {
                 $responseCode    = sanitize_text_field( $error['code'] );
                 $responseMessage = sanitize_text_field( $error['message'] );
 
-                // If we get "duplicate_of_existing," mark it as sent but log the response
+                // If we get a duplicate error, mark it as sent.
                 if ( '10009' === $responseCode && 'firewallaccessrules.api.duplicate_of_existing' === $responseMessage ) {
                     pssx_update_cloudflare_response( intval( $ip->id ), wp_remote_retrieve_body( $response ) );
                     $wpdb->update(
@@ -246,10 +244,10 @@ function pssx_add_ips_to_cloudflare() {
                 }
             }
 
-            // Successfully created the rule
+            // Successfully created the rule.
             pssx_update_cloudflare_response( intval( $ip->id ), wp_remote_retrieve_body( $response ) );
 
-            // Mark IP as sent in the custom table
+            // Mark IP as sent in the custom table.
             $wpdb->update(
                 $table_name,
                 array( 'isSent' => 1 ),
@@ -282,18 +280,91 @@ function pssx_render_ips_tab() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'pssx_blocked_ips';
 
-    // Fetch all blocked IPs
-    $ips = $wpdb->get_results( "SELECT * FROM `$table_name`" ); // FIXED: Enclosed table name in backticks
+    // Check for CSV export.
+    if ( isset( $_GET['export_csv'] ) ) {
+        // Clear any buffered output.
+        if ( ob_get_length() ) {
+            ob_end_clean();
+        }
 
-    // Get the total number of rows
-    $totalRows = count( $ips );
+        // Set CSV headers.
+        header( 'Content-Type: text/csv; charset=utf-8' );
+        header( 'Content-Disposition: attachment; filename=blocked_ips.csv' );
 
-    // Since DataTables scripts are enqueued and initialized globally,
-    // we do not need to enqueue scripts or initialize the table again here.
+        $output = fopen( 'php://output', 'w' );
 
+        // Define CSV column headers.
+        fputcsv( $output, array(
+            'ID',
+            'Blocked Time',
+            'IP',
+            'Rule Details',
+            'Country Code',
+            'Usage Type',
+            'ISP',
+            'Confidence Score',
+            'Block Mode',
+            'CF Response',
+            'Is Sent'
+        ) );
+
+        // Fetch all blocked IPs.
+        $ips = $wpdb->get_results( "SELECT * FROM `$table_name`" );
+        if ( $ips && is_array( $ips ) ) {
+            foreach ( $ips as $ip ) {
+                // Process rule details into a plain text string.
+                $rule_text = 'N/A';
+                if ( ! empty( $ip->rule_details ) ) {
+                    $rule_details = json_decode( $ip->rule_details, true );
+                    if ( is_array( $rule_details ) && isset( $rule_details['criteria'] ) ) {
+                        $parts = array();
+                        foreach ( $rule_details['criteria'] as $key => $value ) {
+                            if ( is_array( $value ) ) {
+                                $parts[] = ucfirst( str_replace( '_', ' ', $key ) ) . ': ' . $value['operator'] . ' ' . $value['value'];
+                            } else {
+                                $parts[] = ucfirst( str_replace( '_', ' ', $key ) ) . ': ' . $value;
+                            }
+                        }
+                        if ( isset( $rule_details['action'] ) ) {
+                            $parts[] = 'Action: ' . ucfirst( str_replace( '_', ' ', $rule_details['action'] ) );
+                        }
+                        $rule_text = implode( '; ', $parts );
+                    }
+                }
+
+                // Write the CSV row.
+                fputcsv( $output, array(
+                    $ip->id,
+                    $ip->blockedTime,
+                    $ip->ip,
+                    $rule_text,
+                    $ip->countryCode,
+                    $ip->usageType,
+                    $ip->isp,
+                    $ip->confidenceScore,
+                    ucfirst( str_replace( '_', ' ', $ip->block_mode ) ),
+                    $ip->cfResponse,
+                    $ip->isSent,
+                ) );
+            }
+        }
+        fclose( $output );
+        exit;
+    }
+
+    // Normal HTML output.
+    $ips = $wpdb->get_results( "SELECT * FROM `$table_name`" );
+    $totalRows = is_array( $ips ) ? count( $ips ) : 0;
     ?>
     <h2><?php esc_html_e( 'Blocked IPs', 'proactive-security-suite' ); ?></h2>
-
+    
+    <!-- Export to CSV Button -->
+    <p>
+        <a href="<?php echo esc_url( add_query_arg( 'export_csv', 1 ) ); ?>" class="button button-secondary">
+            <?php esc_html_e( 'Export to CSV', 'proactive-security-suite' ); ?>
+        </a>
+    </p>
+    
     <table id="pssx-ips-table" class="wp-list-table widefat fixed striped">
         <thead>
             <tr>
@@ -324,7 +395,6 @@ function pssx_render_ips_tab() {
                         <td><?php echo esc_html( $ip->ip ); ?></td>
                         <td>
                             <?php
-                            // Display the rule details if available
                             if ( ! empty( $ip->rule_details ) ) {
                                 $rule_details = json_decode( $ip->rule_details, true );
                                 if ( is_array( $rule_details ) && isset( $rule_details['criteria'] ) ) {
@@ -374,4 +444,3 @@ function pssx_render_ips_tab() {
     </button>
     <?php
 }
-
