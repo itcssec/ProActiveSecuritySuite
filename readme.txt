@@ -4,7 +4,7 @@ Tags: Wordfence, Cloudflare, Security, Wordpress Security, Firewall
 Requires at least: 5.2
 Requires PHP: 7.4
 Tested up to: 6.7
-Stable tag: 1.5.9.6
+Stable tag: 1.5.9.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -285,9 +285,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Upgrade Notice ==
 
-= 1.5.9.6 =
+= 1.5.9.7 =
 
-New feature: Added an export to CSV functionality on the Blocked IPs and Traffic Insights pages.  
+Fix: Fix an issue where a missing file caused fatal error
 
 == Changelog ==
 
@@ -470,6 +470,11 @@ Minor fixes.
 = 1.5.9.6 =
 
 New feature: Added an export to CSV functionality on the Blocked IPs and Traffic Insights pages.  
+
+= 1.5.9.7 =
+
+Fix: Fix an issue where a missing file caused fatal error
+
 
 
 == External Services ==
