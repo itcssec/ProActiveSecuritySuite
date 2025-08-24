@@ -143,4 +143,48 @@ jQuery(document).ready(function($) {
             alert('Please select at least one record to delete from Cloudflare.');
         }
     });
+
+    $('#pssx-add-ip-form').on('submit', function(e){
+        e.preventDefault();
+        var ip = $('#pssx-new-ip').val();
+        var comment = $('#pssx-new-comment').val();
+        $.ajax({
+            url: pssx_ajax_object.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'pssx_add_ip_cloudflare',
+                ip: ip,
+                comment: comment,
+                pssx_ips_tab_nonce: pssx_ajax_object.pssx_ips_tab_nonce
+            },
+            success: function(response){
+                if(response.success){
+                    alert(response.data.message);
+                    location.reload();
+                } else {
+                    alert(response.data.message);
+                }
+            }
+        });
+    });
+
+    $('#pssx-sync-cloudflare').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+            url: pssx_ajax_object.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'pssx_sync_ips_cloudflare',
+                pssx_ips_tab_nonce: pssx_ajax_object.pssx_ips_tab_nonce
+            },
+            success: function(response){
+                if(response.success){
+                    alert(response.data.message);
+                    location.reload();
+                } else {
+                    alert(response.data.message);
+                }
+            }
+        });
+    });
 });

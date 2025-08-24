@@ -3,7 +3,7 @@
 /*
 Plugin Name: Proactive Security Suite
 Description: Enhance your WordPress website’s security with the ProActive Security Suite. This powerful plugin offers advanced security features including automatic IP blocking, an advanced rule builder, traffic analysis, and seamless integration with services like Cloudflare, AbuseIPDB, and Whatismybrowser.com. ProActive Security Suite provides proactive defense mechanisms to protect your site from malicious traffic and potential threats before they reach your server.
-Version: 1.5.9.7
+Version: 1.5.9.8
 Author: ITCS
 Author URI: https://itcs.services/
 License: GPLv2 or later
@@ -48,6 +48,7 @@ if ( !function_exists( 'pssx_fs' ) ) {
 // Define plugin constants.
 define( 'PSSX_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PSSX_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'PSSX_VERSION', '1.5.9.8' );
 // Include necessary files.
 require_once PSSX_PLUGIN_DIR . 'includes/helpers.php';
 require_once PSSX_PLUGIN_DIR . 'includes/admin-settings.php';
@@ -57,7 +58,9 @@ require_once PSSX_PLUGIN_DIR . 'includes/scripts.php';
 // Activation hook to schedule cron job.
 register_activation_hook( __FILE__, 'pssx_activate_plugin' );
 function pssx_activate_plugin() {
+    pssx_check_custom_tables();
     pssx_schedule_cron_job();
+    update_option( 'pssx_version', PSSX_VERSION );
 }
 
 // Deactivation hook to clear scheduled cron job.
@@ -78,7 +81,6 @@ function pssx_schedule_cron_job() {
 
 // Plugin initialization.
 function pssx_init_plugin() {
-    pssx_check_custom_tables();
     // Enqueue scripts and styles in admin.
     add_action( 'admin_enqueue_scripts', 'pssx_enqueue_scripts' );
     // CHANGED: Moved admin inline styles from echo to proper enqueuing
@@ -87,6 +89,17 @@ function pssx_init_plugin() {
 }
 
 add_action( 'init', 'pssx_init_plugin' );
+add_action( 'init', 'pssx_verify_cf_waf_rule' );
+// Run database upgrades when plugin version changes.
+function pssx_maybe_update_plugin() {
+    $installed_version = get_option( 'pssx_version' );
+    if ( version_compare( $installed_version, PSSX_VERSION, '<' ) ) {
+        pssx_check_custom_tables();
+        update_option( 'pssx_version', PSSX_VERSION );
+    }
+}
+
+add_action( 'plugins_loaded', 'pssx_maybe_update_plugin' );
 // Uninstall hook for cleanup.
 if ( function_exists( 'register_uninstall_hook' ) ) {
     register_uninstall_hook( __FILE__, 'pssx_uninstall_plugin' );

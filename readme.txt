@@ -3,8 +3,8 @@ Contributors: ITCS, freemius
 Tags: Wordfence, Cloudflare, Security, Wordpress Security, Firewall
 Requires at least: 5.2
 Requires PHP: 7.4
-Tested up to: 6.7
-Stable tag: 1.5.9.7
+Tested up to: 6.8
+Stable tag: 1.5.9.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
     <li><strong>WhatIsMyBrowser.com API Integration:</strong> Advanced user agent analysis and detection capabilities.</li>
     <li><strong>Enhanced AbuseIPDB Integration:</strong> Automatic updates for all entries with the same IP address.</li>
     <li><strong>Priority Support:</strong> Access dedicated support for assistance and troubleshooting.</li>
+    <li><strong>Cloudflare Custom WAF Rule &amp; List Management:</strong> Optionally create a Cloudflare custom list and associated WAF rule. Manage entries directly from the plugin and get notified if Cloudflare reports issues such as a full list.</li>
 </ul>
 
 <div class="note">
@@ -122,6 +123,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
             <li>Navigate to <em>Settings &gt; ProActive Security Suite</em>.</li>
             <li>Enter your Cloudflare credentials securely.</li>
             <li>Adjust settings like Blocked Hits Threshold, Block Scope, and Block Mode.</li>
+            <li>Enable <em>Custom WAF Rule</em> and supply a rule name to allow the plugin to create and maintain a Cloudflare custom list and matching WAF rule. List entries can be viewed, added, or removed from within the plugin.</li>
         </ul>
     </li>
 </ol>
@@ -469,11 +471,15 @@ Minor fixes.
 
 = 1.5.9.6 =
 
-New feature: Added an export to CSV functionality on the Blocked IPs and Traffic Insights pages.  
+New feature: Added an export to CSV functionality on the Blocked IPs and Traffic Insights pages.
 
 = 1.5.9.7 =
 
 Fix: Fix an issue where a missing file caused fatal error
+
+= 1.5.9.8 =
+
+New: Added option to create and manage a Cloudflare custom IP list with an associated WAF rule. Users can view, add, or remove IPs from the list directly in the plugin, and are notified when Cloudflare returns errors such as list capacity being reached.
 
 
 

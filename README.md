@@ -82,6 +82,7 @@
     <li><strong>WhatIsMyBrowser.com API Integration:</strong> Advanced user agent analysis and detection capabilities.</li>
     <li><strong>Enhanced AbuseIPDB Integration:</strong> Automatic updates for all entries with the same IP address.</li>
     <li><strong>Priority Support:</strong> Access dedicated support for assistance and troubleshooting.</li>
+    <li><strong>Cloudflare Custom WAF Rule &amp; List Management:</strong> Optionally create a Cloudflare custom list and associated WAF rule. Manage list entries directly from the plugin and receive notifications if Cloudflare reports errors such as a full list.</li>
     <li><strong>NEW - Traffic Insights:</strong> View your traffic at a glance by aggregating and displaying each IP address only once. This tab provides:
         <ul>
             <li><em>Aggregated IP Overview:</em> See first/last seen timestamps, total requests, and threat data from IPData in a single row per IP.</li>
@@ -123,6 +124,7 @@
             <li>Navigate to <em>Settings &gt; ProActive Security Suite</em>.</li>
             <li>Enter your Cloudflare credentials securely.</li>
             <li>Adjust settings like Blocked Hits Threshold, Block Scope, and Block Mode.</li>
+            <li>Enable <em>Custom WAF Rule</em> and provide a rule name to let the plugin create and maintain a Cloudflare custom list and corresponding WAF rule. You can view, add, or remove IPs from the list within the plugin.</li>
         </ul>
     </li>
 </ol>

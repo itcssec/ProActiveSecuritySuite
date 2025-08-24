@@ -73,6 +73,8 @@ function pssx_fetch_and_store_blocked_ips() {
                         'blockedHits'     => intval( $ip->blockedHits ),
                         'ip'              => $ip_address,
                         'cfResponse'      => '',
+                        'cf_list_item_id' => '',
+                        'cf_item_id'      => null,
                         'isSent'          => 0,
                         'countryCode'     => '',
                         'usageType'       => '',
@@ -80,7 +82,7 @@ function pssx_fetch_and_store_blocked_ips() {
                         'confidenceScore' => '',
                         'block_mode'      => $block_mode,
                     ),
-                    array( '%s', '%d', '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s' )
+                    array( '%s', '%d', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s' )
                 );
             }
         }
@@ -124,6 +126,8 @@ function pssx_add_ips_to_cloudflare() {
     $block_mode      = sanitize_text_field( get_option( 'pssx_block_mode', 'block' ) );
     $zone_id         = sanitize_text_field( get_option( 'pssx_cloudflare_zone_id' ) );
     $account_id      = sanitize_text_field( get_option( 'pssx_cloudflare_account_id' ) );
+    $use_waf_rule    = sanitize_text_field( get_option( 'pssx_use_waf_rule', 'no' ) );
+    $cf_list_id      = sanitize_text_field( get_option( 'pssx_cf_list_id', '' ) );
     $ips_to_send     = $wpdb->get_results(
         $wpdb->prepare(
             "SELECT * FROM `$table_name` WHERE `isSent` = %d",
@@ -189,74 +193,128 @@ function pssx_add_ips_to_cloudflare() {
             }
 
             // Send IP to Cloudflare.
-            if ( 'domain' === $block_scope ) {
-                $api_url = "https://api.cloudflare.com/client/v4/zones/" . urlencode( $zone_id ) . "/firewall/access_rules/rules";
-            } else {
-                $api_url = "https://api.cloudflare.com/client/v4/accounts/" . urlencode( $account_id ) . "/firewall/access_rules/rules";
-            }
-
-            $args = array(
-                'headers' => array(
-                    'X-Auth-Email' => $email,
-                    'X-Auth-Key'   => $key,
-                    'Content-Type' => 'application/json',
-                ),
-                'body'    => wp_json_encode( array(
-                    'mode'          => $block_mode,
-                    'configuration' => array(
-                        'target' => 'ip',
-                        'value'  => $ip_address,
-                    ),
-                    'notes'         => 'Blocked by Proactive Security Suite on ' . current_time( 'mysql' ),
-                ) ),
-                'timeout' => 30,
-            );
-
-            $response = wp_remote_post( $api_url, $args );
-
-            if ( is_wp_error( $response ) ) {
-                error_log( 'Failed to create access rule for IP ' . $ip_address . ': ' . $response->get_error_message() );
-                continue;
-            }
-
-            $body = json_decode( wp_remote_retrieve_body( $response ), true );
-
-            if ( ! empty( $body['errors'] ) ) {
-                $error           = $body['errors'][0];
-                $responseCode    = sanitize_text_field( $error['code'] );
-                $responseMessage = sanitize_text_field( $error['message'] );
-
-                // If we get a duplicate error, mark it as sent.
-                if ( '10009' === $responseCode && 'firewallaccessrules.api.duplicate_of_existing' === $responseMessage ) {
-                    pssx_update_cloudflare_response( intval( $ip->id ), wp_remote_retrieve_body( $response ) );
-                    $wpdb->update(
-                        $table_name,
-                        array( 'isSent' => 1 ),
-                        array( 'id' => intval( $ip->id ) ),
-                        array( '%d' ),
-                        array( '%d' )
-                    );
-                    $processed_ips_count++;
-                    continue;
-                } else {
-                    error_log( 'Failed to create access rule for IP ' . $ip_address . ': ' . print_r( $body, true ) );
+            if ( 'yes' === $use_waf_rule ) {
+                // When using a WAF rule, add IPs to the Cloudflare list and store item IDs for traceability.
+                if ( empty( $cf_list_id ) ) {
+                    pssx_add_admin_notice( __( 'Cloudflare list ID missing. Cannot add IP to WAF list.', 'proactive-security-suite' ) );
                     continue;
                 }
+                $api_url = 'https://api.cloudflare.com/client/v4/accounts/' . urlencode( $account_id ) . '/rules/lists/' . urlencode( $cf_list_id ) . '/items';
+                $args    = array(
+                    'headers' => array(
+                        'X-Auth-Email' => $email,
+                        'X-Auth-Key'   => $key,
+                        'Content-Type' => 'application/json',
+                    ),
+                    'body'    => wp_json_encode(
+                        array(
+                            array(
+                                'ip'      => $ip_address,
+                                'comment' => 'Blocked by Proactive Security Suite on ' . current_time( 'mysql' ), // Traceability note.
+                            ),
+                        )
+                    ),
+                    'timeout' => 30,
+                );
+                $response = wp_remote_post( $api_url, $args );
+                if ( is_wp_error( $response ) ) {
+                    pssx_add_admin_notice( sprintf( __( 'Failed to add IP %1$s to Cloudflare list: %2$s', 'proactive-security-suite' ), $ip_address, $response->get_error_message() ) );
+                    continue;
+                }
+                $body = json_decode( wp_remote_retrieve_body( $response ), true );
+                if ( empty( $body['success'] ) ) {
+                    $error_message = isset( $body['errors'][0]['message'] ) ? sanitize_text_field( $body['errors'][0]['message'] ) : __( 'Unknown error', 'proactive-security-suite' );
+                    pssx_add_admin_notice( sprintf( __( 'Cloudflare list error for IP %1$s: %2$s', 'proactive-security-suite' ), $ip_address, $error_message ) );
+                    continue;
+                }
+                $item_ids = array();
+                if ( isset( $body['result'] ) && is_array( $body['result'] ) ) {
+                    foreach ( $body['result'] as $item ) {
+                        if ( isset( $item['id'] ) ) {
+                            $item_ids[] = sanitize_text_field( $item['id'] );
+                        }
+                    }
+                }
+                pssx_update_cloudflare_response( intval( $ip->id ), wp_remote_retrieve_body( $response ) );
+                $wpdb->update(
+                    $table_name,
+                    array(
+                        'isSent'          => 1,
+                        'cf_list_item_id' => wp_json_encode( $item_ids ),
+                        'cf_item_id'      => isset( $item_ids[0] ) ? $item_ids[0] : null,
+                    ),
+                    array( 'id' => intval( $ip->id ) ),
+                    array( '%d', '%s', '%s' ),
+                    array( '%d' )
+                );
+                $processed_ips_count++;
+            } else {
+                if ( 'domain' === $block_scope ) {
+                    $api_url = 'https://api.cloudflare.com/client/v4/zones/' . urlencode( $zone_id ) . '/firewall/access_rules/rules';
+                } else {
+                    $api_url = 'https://api.cloudflare.com/client/v4/accounts/' . urlencode( $account_id ) . '/firewall/access_rules/rules';
+                }
+                $args = array(
+                    'headers' => array(
+                        'X-Auth-Email' => $email,
+                        'X-Auth-Key'   => $key,
+                        'Content-Type' => 'application/json',
+                    ),
+                    'body'    => wp_json_encode(
+                        array(
+                            'mode'          => $block_mode,
+                            'configuration' => array(
+                                'target' => 'ip',
+                                'value'  => $ip_address,
+                            ),
+                            'notes'         => 'Blocked by Proactive Security Suite on ' . current_time( 'mysql' ),
+                        )
+                    ),
+                    'timeout' => 30,
+                );
+                $response = wp_remote_post( $api_url, $args );
+                if ( is_wp_error( $response ) ) {
+                    pssx_add_admin_notice( sprintf( __( 'Failed to create access rule for IP %1$s: %2$s', 'proactive-security-suite' ), $ip_address, $response->get_error_message() ) );
+                    continue;
+                }
+                $body = json_decode( wp_remote_retrieve_body( $response ), true );
+                if ( ! empty( $body['errors'] ) ) {
+                    $error           = $body['errors'][0];
+                    $responseCode    = sanitize_text_field( $error['code'] );
+                    $responseMessage = sanitize_text_field( $error['message'] );
+                    // If we get a duplicate error, mark it as sent.
+                    if ( '10009' === $responseCode && 'firewallaccessrules.api.duplicate_of_existing' === $responseMessage ) {
+                        pssx_update_cloudflare_response( intval( $ip->id ), wp_remote_retrieve_body( $response ) );
+                        $wpdb->update(
+                            $table_name,
+                            array( 'isSent' => 1 ),
+                            array( 'id' => intval( $ip->id ) ),
+                            array( '%d' ),
+                            array( '%d' )
+                        );
+                        $processed_ips_count++;
+                        continue;
+                    } else {
+                        pssx_add_admin_notice( sprintf( __( 'Failed to create access rule for IP %1$s: %2$s', 'proactive-security-suite' ), $ip_address, $responseMessage ) );
+                        continue;
+                    }
+                }
+                // Successfully created the rule.
+                pssx_update_cloudflare_response( intval( $ip->id ), wp_remote_retrieve_body( $response ) );
+                // Mark IP as sent in the custom table.
+                $cf_item_id = isset( $body['result']['id'] ) ? sanitize_text_field( $body['result']['id'] ) : null;
+                $wpdb->update(
+                    $table_name,
+                    array(
+                        'isSent'     => 1,
+                        'cf_item_id' => $cf_item_id,
+                    ),
+                    array( 'id' => intval( $ip->id ) ),
+                    array( '%d', '%s' ),
+                    array( '%d' )
+                );
+                $processed_ips_count++;
             }
-
-            // Successfully created the rule.
-            pssx_update_cloudflare_response( intval( $ip->id ), wp_remote_retrieve_body( $response ) );
-
-            // Mark IP as sent in the custom table.
-            $wpdb->update(
-                $table_name,
-                array( 'isSent' => 1 ),
-                array( 'id' => intval( $ip->id ) ),
-                array( '%d' ),
-                array( '%d' )
-            );
-
-            $processed_ips_count++;
         }
     }
     update_option( 'pssx_last_processed_time', current_time( 'mysql' ) );
@@ -357,7 +415,14 @@ function pssx_render_ips_tab() {
     $totalRows = is_array( $ips ) ? count( $ips ) : 0;
     ?>
     <h2><?php esc_html_e( 'Blocked IPs', 'proactive-security-suite' ); ?></h2>
-    
+
+    <form id="pssx-add-ip-form" style="margin-bottom: 15px;">
+        <input type="text" id="pssx-new-ip" placeholder="<?php esc_attr_e( 'IP address', 'proactive-security-suite' ); ?>" required>
+        <input type="text" id="pssx-new-comment" placeholder="<?php esc_attr_e( 'Comment (optional)', 'proactive-security-suite' ); ?>">
+        <button type="submit" class="button button-primary"><?php esc_html_e( 'Add IP', 'proactive-security-suite' ); ?></button>
+        <button type="button" id="pssx-sync-cloudflare" class="button"><?php esc_html_e( 'Sync from Cloudflare', 'proactive-security-suite' ); ?></button>
+    </form>
+
     <!-- Export to CSV Button -->
     <p>
         <a href="<?php echo esc_url( add_query_arg( 'export_csv', 1 ) ); ?>" class="button button-secondary">

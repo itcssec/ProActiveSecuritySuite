@@ -47,44 +47,22 @@ function pssx_render_admin_page() {
     // Build the base URL for our settings page.
     $base_url = admin_url( 'options-general.php?page=pss-settings' );
 
-    // Generate nonce-protected links for each tab:
-    $settings_tab_url = wp_nonce_url(
-        add_query_arg( array( 'tab' => 'pss-settings' ), $base_url ),
-        'pssx_tab_switch',
-        'pssx_tab_nonce'
-    );
-    $ips_tab_url = wp_nonce_url(
-        add_query_arg( array( 'tab' => 'pssx-ips' ), $base_url ),
-        'pssx_tab_switch',
-        'pssx_tab_nonce'
-    );
+    // Generate links for each tab (without a tab-switch nonce).
+    $settings_tab_url = add_query_arg( array( 'tab' => 'pss-settings' ), $base_url );
+    $ips_tab_url      = add_query_arg( array( 'tab' => 'pssx-ips' ), $base_url );
 
     if ( function_exists( 'pssx_fs' ) && pssx_fs()->is__premium_only() ) {
-        $traffic_tab_url = wp_nonce_url(
-            add_query_arg( array( 'tab' => 'pssx-traffic' ), $base_url ),
-            'pssx_tab_switch',
-            'pssx_tab_nonce'
-        );
-        $rules_tab_url = wp_nonce_url(
-            add_query_arg( array( 'tab' => 'pssx-rules' ), $base_url ),
-            'pssx_tab_switch',
-            'pssx_tab_nonce'
-        );
-        $insights_tab_url = wp_nonce_url(
-            add_query_arg( array( 'tab' => 'pssx-insights' ), $base_url ),
-            'pssx_tab_switch',
-            'pssx_tab_nonce'
-        );
+        $traffic_tab_url  = add_query_arg( array( 'tab' => 'pssx-traffic' ), $base_url );
+        $rules_tab_url    = add_query_arg( array( 'tab' => 'pssx-rules' ), $base_url );
+        $insights_tab_url = add_query_arg( array( 'tab' => 'pssx-insights' ), $base_url );
     }
 
-    // Default tab is pss-settings; only use $_GET['tab'] if nonce is valid.
+    // Default tab is 'pss-settings'; override if ?tab= is present.
     $active_tab = 'pss-settings';
-    if (
-        isset( $_GET['tab'], $_GET['pssx_tab_nonce'] )
-        && check_admin_referer( 'pssx_tab_switch', 'pssx_tab_nonce' )
-    ) {
+    if ( isset( $_GET['tab'] ) && ! empty( $_GET['tab'] ) ) {
         $active_tab = sanitize_text_field( wp_unslash( $_GET['tab'] ) );
     }
+
     ?>
     <div class="wrap">
         <h1><?php esc_html_e( 'Proactive Security Suite', 'proactive-security-suite' ); ?></h1>
@@ -132,6 +110,7 @@ function pssx_render_admin_page() {
                 break;
             case 'pssx-traffic':
                 if ( function_exists( 'pssx_fs' ) && pssx_fs()->is__premium_only() ) {
+                    include 'captured-traffic.php';
                     pssx_render_traffic_tab();
                 } else {
                     echo '<div class="notice notice-warning"><p>' .
@@ -145,6 +124,7 @@ function pssx_render_admin_page() {
                 break;
             case 'pssx-rules':
                 if ( function_exists( 'pssx_fs' ) && pssx_fs()->is__premium_only() ) {
+                    include 'rule-builder.php';
                     pssx_render_rule_builder_tab();
                 } else {
                     echo '<div class="notice notice-warning"><p>' .
@@ -176,7 +156,8 @@ function pssx_render_admin_page() {
         ?>
     </div>
     <?php
-}
+
+    }
 
 /**
  * Renders the premium-only "Traffic Insights" tab.
@@ -199,9 +180,11 @@ function pssx_render_settings_tab() {
         wp_die( esc_html__( 'Access is not allowed.', 'proactive-security-suite' ) );
     }
 
+    $pssx_recreate_waf_rule = isset( $_POST['pssx_recreate_waf_rule'] );
+
     // Check form submission with nonce.
     if (
-        isset( $_POST['pssx_settings_submit'] ) &&
+        ( isset( $_POST['pssx_settings_submit'] ) || $pssx_recreate_waf_rule ) &&
         isset( $_POST['pssx_settings_nonce'] ) &&
         check_admin_referer( 'pssx_settings_action', 'pssx_settings_nonce' )
     ) {
@@ -243,6 +226,12 @@ function pssx_render_settings_tab() {
             $cron_interval = sanitize_text_field( wp_unslash( $_POST['pssx_cron_interval'] ) );
         }
 
+        $pssx_use_waf_rule  = isset( $_POST['pssx_use_waf_rule'] ) ? 'yes' : 'no';
+        $pssx_waf_rule_name = '';
+        if ( isset( $_POST['pssx_waf_rule_name'] ) ) {
+            $pssx_waf_rule_name = sanitize_text_field( wp_unslash( $_POST['pssx_waf_rule_name'] ) );
+        }
+
         // Update options
         update_option( 'pssx_cloudflare_email', $cloudflare_email );
         if ( ! empty( $cloudflare_key_input ) && $cloudflare_key_input !== str_repeat( '*', 10 ) ) {
@@ -257,6 +246,14 @@ function pssx_render_settings_tab() {
 
         $pssx_enable_abuseipdb = isset( $_POST['pssx_enable_abuseipdb'] ) ? 'yes' : 'no';
         update_option( 'pssx_enable_abuseipdb', $pssx_enable_abuseipdb );
+
+        update_option( 'pssx_use_waf_rule', $pssx_use_waf_rule );
+        if ( 'no' === $pssx_use_waf_rule ) {
+            delete_option( 'pssx_cf_rule_id' );
+            delete_option( 'pssx_cf_list_id' );
+            error_log( 'pssx_use_waf_rule disabled: Cloudflare WAF rule and list IDs removed.' );
+        }
+        update_option( 'pssx_waf_rule_name', $pssx_waf_rule_name );
 
         if ( function_exists( 'pssx_fs' ) && pssx_fs()->is__premium_only() ) {
             // Premium fields
@@ -293,6 +290,19 @@ function pssx_render_settings_tab() {
             }
         }
 
+        if ( $pssx_recreate_waf_rule ) {
+            delete_option( 'pssx_cf_rule_id' );
+            delete_option( 'pssx_cf_list_id' );
+            pssx_create_cf_waf_rule();
+            if ( get_option( 'pssx_cf_rule_id' ) && get_option( 'pssx_cf_list_id' ) ) {
+                pssx_add_admin_notice( __( 'Cloudflare WAF rule recreated successfully.', 'proactive-security-suite' ), 'success' );
+            } else {
+                pssx_add_admin_notice( __( 'Failed to recreate Cloudflare WAF rule.', 'proactive-security-suite' ) );
+            }
+        } elseif ( 'yes' === $pssx_use_waf_rule ) {
+            pssx_create_cf_waf_rule();
+        }
+
         update_option( 'pssx_blocked_hits_threshold', $blocked_hits_threshold );
         update_option( 'pssx_block_scope', $block_scope );
         update_option( 'pssx_block_mode', $block_mode );
@@ -324,6 +334,8 @@ function pssx_render_settings_tab() {
     $editable_roles                    = get_editable_roles();
     $ipdata_api_id                     = get_option( 'pssx_ipdata_api_id', '' );
     $pssx_enable_ipdata_lookup_traffic = get_option( 'pssx_enable_ipdata_lookup_traffic', 'no' );
+    $pssx_use_waf_rule                 = get_option( 'pssx_use_waf_rule', 'no' );
+    $pssx_waf_rule_name                = get_option( 'pssx_waf_rule_name', '' );
 
     settings_errors( 'pssx_settings' );
     ?>
@@ -359,6 +371,29 @@ function pssx_render_settings_tab() {
                     <td>
                         <input type="text" name="pssx_cloudflare_account_id"
                                value="<?php echo esc_attr( $cloudflare_account_id ); ?>" />
+                    </td>
+                </tr>
+
+                <tr valign="top">
+                    <th scope="row"><?php esc_html_e( 'Use Cloudflare WAF Rule', 'proactive-security-suite' ); ?></th>
+                    <td>
+                        <input type="checkbox" name="pssx_use_waf_rule" value="yes"
+                               <?php checked( 'yes', $pssx_use_waf_rule ); ?> />
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row"><?php esc_html_e( 'WAF Rule Name', 'proactive-security-suite' ); ?></th>
+                    <td>
+                        <input type="text" name="pssx_waf_rule_name"
+                               value="<?php echo esc_attr( $pssx_waf_rule_name ); ?>" />
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">&nbsp;</th>
+                    <td>
+                        <button type="submit" name="pssx_recreate_waf_rule" class="button">
+                            <?php esc_html_e( 'Recreate WAF Rule', 'proactive-security-suite' ); ?>
+                        </button>
                     </td>
                 </tr>
 
@@ -692,351 +727,3 @@ function pssx_admin_styles( $hook ) {
 }
 add_action( 'admin_enqueue_scripts', 'pssx_admin_styles' );
 
-/**
- * Rule Builder tab (Premium).
- */
-function pssx_render_rule_builder_tab() {
-    if ( ! current_user_can( 'manage_options' ) ) {
-        wp_die( esc_html__( 'Access is not allowed.', 'proactive-security-suite' ) );
-    }
-
-    // Handle form submission for adding a new rule.
-    if (
-        isset( $_POST['pssx_add_rule_nonce'] ) &&
-        check_admin_referer( 'pssx_add_rule_action', 'pssx_add_rule_nonce' )
-    ) {
-        $criteria = array();
-
-        // Confidence Score
-        if (
-            ! empty( $_POST['confidence_score_operator'] )
-            && isset( $_POST['confidence_score_value'] )
-            && '' !== $_POST['confidence_score_value']
-        ) {
-            $criteria['confidence_score'] = array(
-                'operator' => sanitize_text_field( wp_unslash( $_POST['confidence_score_operator'] ) ),
-                'value'    => intval( wp_unslash( $_POST['confidence_score_value'] ) ),
-            );
-        }
-
-        // is_whitelisted
-        if ( isset( $_POST['is_whitelisted'] ) && '' !== $_POST['is_whitelisted'] ) {
-            $criteria['is_whitelisted'] = sanitize_text_field( wp_unslash( $_POST['is_whitelisted'] ) );
-        }
-
-        // is_abusive
-        if ( isset( $_POST['is_abusive'] ) && '' !== $_POST['is_abusive'] ) {
-            $criteria['is_abusive'] = sanitize_text_field( wp_unslash( $_POST['is_abusive'] ) );
-        }
-
-        // operating_system
-        if (
-            isset( $_POST['operating_system_operator'], $_POST['operating_system_value'] )
-            && '' !== $_POST['operating_system_value']
-        ) {
-            $criteria['operating_system'] = array(
-                'operator' => sanitize_text_field( wp_unslash( $_POST['operating_system_operator'] ) ),
-                'value'    => sanitize_text_field( wp_unslash( $_POST['operating_system_value'] ) ),
-            );
-        }
-
-        // software
-        if (
-            isset( $_POST['software_operator'], $_POST['software_value'] )
-            && '' !== $_POST['software_value']
-        ) {
-            $criteria['software'] = array(
-                'operator' => sanitize_text_field( wp_unslash( $_POST['software_operator'] ) ),
-                'value'    => sanitize_text_field( wp_unslash( $_POST['software_value'] ) ),
-            );
-        }
-
-        // IPData Threat fields
-        $threat_fields = array(
-            'ipdata_is_tor',
-            'ipdata_is_icloud_relay',
-            'ipdata_is_proxy',
-            'ipdata_is_datacenter',
-            'ipdata_is_anonymous',
-            'ipdata_is_known_attacker',
-            'ipdata_is_known_abuser',
-            'ipdata_is_threat',
-            'ipdata_is_bogon'
-        );
-
-        foreach ( $threat_fields as $field ) {
-            if ( isset( $_POST[ $field ] ) && '' !== $_POST[ $field ] ) {
-                $criteria[ $field ] = sanitize_text_field( wp_unslash( $_POST[ $field ] ) );
-            }
-        }
-
-        $action = '';
-        if ( isset( $_POST['action'] ) ) {
-            $action = sanitize_text_field( wp_unslash( $_POST['action'] ) );
-        }
-
-        $priority = 0;
-        if ( isset( $_POST['priority'] ) && '' !== $_POST['priority'] ) {
-            $priority = intval( wp_unslash( $_POST['priority'] ) );
-        }
-
-        global $wpdb;
-        $rules_table = $wpdb->prefix . 'pssx_rules';
-        $wpdb->insert(
-            $rules_table,
-            array(
-                'criteria' => wp_json_encode( $criteria ),
-                'action'   => $action,
-                'priority' => $priority,
-            ),
-            array( '%s', '%s', '%d' )
-        );
-
-        wp_safe_redirect(
-            esc_url_raw(
-                add_query_arg(
-                    'message',
-                    'rule_added',
-                    admin_url( 'options-general.php?page=pss-settings&tab=pssx-rules' )
-                )
-            )
-        );
-        exit;
-    }
-
-    // Handle deletion of a rule.
-    if (
-        isset( $_GET['action'], $_GET['rule_id'] )
-        && 'delete_rule' === $_GET['action']
-        && check_admin_referer( 'pssx_delete_rule_nonce', '_wpnonce' )
-    ) {
-        $rule_id = intval( $_GET['rule_id'] );
-        global $wpdb;
-        $rules_table = $wpdb->prefix . 'pssx_rules';
-        $wpdb->delete(
-            $rules_table,
-            array( 'id' => $rule_id ),
-            array( '%d' )
-        );
-
-        wp_safe_redirect(
-            esc_url_raw(
-                add_query_arg(
-                    'message',
-                    'rule_deleted',
-                    admin_url( 'options-general.php?page=pss-settings&tab=pssx-rules' )
-                )
-            )
-        );
-        exit;
-    }
-
-    global $wpdb;
-    $rules_table = $wpdb->prefix . 'pssx_rules';
-    $rules = $wpdb->get_results( "SELECT * FROM `{$rules_table}` ORDER BY priority DESC" );
-
-    if ( isset( $_GET['message'] ) ) {
-        if ( 'rule_added' === $_GET['message'] ) {
-            echo '<div class="notice notice-success"><p>' . esc_html__( 'Rule added successfully.', 'proactive-security-suite' ) . '</p></div>';
-        } elseif ( 'rule_deleted' === $_GET['message'] ) {
-            echo '<div class="notice notice-success"><p>' . esc_html__( 'Rule deleted successfully.', 'proactive-security-suite' ) . '</p></div>';
-        }
-    }
-    ?>
-    <h2><?php esc_html_e( 'Rule Builder', 'proactive-security-suite' ); ?></h2>
-    <div class="notice notice-warning">
-        <p>
-            <?php esc_html_e(
-                'Please use automatic mitigation rules with caution. Misconfigured rules may block legitimate traffic, including known bots. Always ensure that "isWhitelisted" is set to "false" when creating rules based on confidence scores.',
-                'proactive-security-suite'
-            ); ?>
-        </p>
-    </div>
-
-    <table class="wp-list-table widefat fixed striped">
-        <thead>
-            <tr>
-                <th><?php esc_html_e( 'Priority', 'proactive-security-suite' ); ?></th>
-                <th><?php esc_html_e( 'Criteria', 'proactive-security-suite' ); ?></th>
-                <th><?php esc_html_e( 'Action', 'proactive-security-suite' ); ?></th>
-                <th><?php esc_html_e( 'Manage', 'proactive-security-suite' ); ?></th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if ( ! empty( $rules ) ) : ?>
-                <?php foreach ( $rules as $rule ) : ?>
-                    <tr>
-                        <td><?php echo esc_html( $rule->priority ); ?></td>
-                        <td>
-                            <?php
-                            $criteria = json_decode( $rule->criteria, true );
-                            if ( ! empty( $criteria ) && is_array( $criteria ) ) {
-                                foreach ( $criteria as $key => $value ) {
-                                    echo '<strong>' . esc_html( ucfirst( str_replace( '_', ' ', $key ) ) ) . ':</strong> ';
-                                    if ( is_array( $value ) && isset( $value['operator'], $value['value'] ) ) {
-                                        echo esc_html( $value['operator'] . ' ' . $value['value'] );
-                                    } else {
-                                        echo esc_html( $value );
-                                    }
-                                    echo '<br>';
-                                }
-                            }
-                            ?>
-                        </td>
-                        <td><?php echo esc_html( ucfirst( str_replace( '_', ' ', $rule->action ) ) ); ?></td>
-                        <td>
-                            <a href="<?php
-                            echo esc_url(
-                                wp_nonce_url(
-                                    add_query_arg(
-                                        array(
-                                            'action'  => 'delete_rule',
-                                            'rule_id' => $rule->id,
-                                        ),
-                                        admin_url( 'options-general.php?page=pss-settings&tab=pssx-rules' )
-                                    ),
-                                    'pssx_delete_rule_nonce'
-                                )
-                            );
-                            ?>">
-                                <?php esc_html_e( 'Delete', 'proactive-security-suite' ); ?>
-                            </a>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            <?php else : ?>
-                <tr>
-                    <td colspan="4">
-                        <?php esc_html_e( 'No rules defined.', 'proactive-security-suite' ); ?>
-                    </td>
-                </tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
-
-    <h3><?php esc_html_e( 'Add New Rule', 'proactive-security-suite' ); ?></h3>
-    <form method="post" action="">
-        <?php wp_nonce_field( 'pssx_add_rule_action', 'pssx_add_rule_nonce' ); ?>
-        <table class="form-table">
-            <!-- Confidence Score -->
-            <tr valign="top">
-                <th scope="row"><?php esc_html_e( 'Confidence Score', 'proactive-security-suite' ); ?></th>
-                <td>
-                    <select name="confidence_score_operator">
-                        <option value=""><?php esc_html_e( 'No Condition', 'proactive-security-suite' ); ?></option>
-                        <option value=">"><?php esc_html_e( '>', 'proactive-security-suite' ); ?></option>
-                        <option value=">="><?php esc_html_e( '>=', 'proactive-security-suite' ); ?></option>
-                        <option value="<"><?php esc_html_e( '<', 'proactive-security-suite' ); ?></option>
-                        <option value="<="><?php esc_html_e( '<=', 'proactive-security-suite' ); ?></option>
-                        <option value="="><?php esc_html_e( '=', 'proactive-security-suite' ); ?></option>
-                    </select>
-                    <input type="number" name="confidence_score_value" min="0" max="100" />
-                </td>
-            </tr>
-            <!-- is_whitelisted -->
-            <tr valign="top">
-                <th scope="row"><?php esc_html_e( 'Is Whitelisted', 'proactive-security-suite' ); ?></th>
-                <td>
-                    <select name="is_whitelisted">
-                        <option value=""><?php esc_html_e( 'Any', 'proactive-security-suite' ); ?></option>
-                        <option value="true"><?php esc_html_e( 'True', 'proactive-security-suite' ); ?></option>
-                        <option value="false"><?php esc_html_e( 'False', 'proactive-security-suite' ); ?></option>
-                    </select>
-                </td>
-            </tr>
-            <!-- is_abusive -->
-            <tr valign="top">
-                <th scope="row"><?php esc_html_e( 'Is Abusive', 'proactive-security-suite' ); ?></th>
-                <td>
-                    <select name="is_abusive">
-                        <option value=""><?php esc_html_e( 'Any', 'proactive-security-suite' ); ?></option>
-                        <option value="true"><?php esc_html_e( 'True', 'proactive-security-suite' ); ?></option>
-                        <option value="false"><?php esc_html_e( 'False', 'proactive-security-suite' ); ?></option>
-                    </select>
-                </td>
-            </tr>
-            <!-- operating_system -->
-            <tr valign="top">
-                <th scope="row"><?php esc_html_e( 'Operating System', 'proactive-security-suite' ); ?></th>
-                <td>
-                    <select name="operating_system_operator">
-                        <option value=""><?php esc_html_e( 'No Condition', 'proactive-security-suite' ); ?></option>
-                        <option value="equals"><?php esc_html_e( 'Equals', 'proactive-security-suite' ); ?></option>
-                        <option value="not_equals"><?php esc_html_e( 'Not Equals', 'proactive-security-suite' ); ?></option>
-                        <option value="contains"><?php esc_html_e( 'Contains', 'proactive-security-suite' ); ?></option>
-                        <option value="not_contains"><?php esc_html_e( 'Does Not Contain', 'proactive-security-suite' ); ?></option>
-                    </select>
-                    <input type="text" name="operating_system_value" />
-                </td>
-            </tr>
-            <!-- software -->
-            <tr valign="top">
-                <th scope="row"><?php esc_html_e( 'Software (Browser)', 'proactive-security-suite' ); ?></th>
-                <td>
-                    <select name="software_operator">
-                        <option value=""><?php esc_html_e( 'No Condition', 'proactive-security-suite' ); ?></option>
-                        <option value="equals"><?php esc_html_e( 'Equals', 'proactive-security-suite' ); ?></option>
-                        <option value="not_equals"><?php esc_html_e( 'Not Equals', 'proactive-security-suite' ); ?></option>
-                        <option value="contains"><?php esc_html_e( 'Contains', 'proactive-security-suite' ); ?></option>
-                        <option value="not_contains"><?php esc_html_e( 'Does Not Contain', 'proactive-security-suite' ); ?></option>
-                    </select>
-                    <input type="text" name="software_value" />
-                </td>
-            </tr>
-
-            <!-- IPData Threat fields -->
-            <?php
-            $ipdata_threat_fields = array(
-                'ipdata_is_tor'            => __( 'IPData Is Tor', 'proactive-security-suite' ),
-                'ipdata_is_icloud_relay'   => __( 'IPData Is iCloud Relay', 'proactive-security-suite' ),
-                'ipdata_is_proxy'          => __( 'IPData Is Proxy', 'proactive-security-suite' ),
-                'ipdata_is_datacenter'     => __( 'IPData Is Datacenter', 'proactive-security-suite' ),
-                'ipdata_is_anonymous'      => __( 'IPData Is Anonymous', 'proactive-security-suite' ),
-                'ipdata_is_known_attacker' => __( 'IPData Is Known Attacker', 'proactive-security-suite' ),
-                'ipdata_is_known_abuser'   => __( 'IPData Is Known Abuser', 'proactive-security-suite' ),
-                'ipdata_is_threat'         => __( 'IPData Is Threat', 'proactive-security-suite' ),
-                'ipdata_is_bogon'          => __( 'IPData Is Bogon', 'proactive-security-suite' ),
-            );
-
-            foreach ( $ipdata_threat_fields as $field => $label ) : ?>
-                <tr valign="top">
-                    <th scope="row"><?php echo esc_html( $label ); ?></th>
-                    <td>
-                        <select name="<?php echo esc_attr( $field ); ?>">
-                            <option value=""><?php esc_html_e( 'Any', 'proactive-security-suite' ); ?></option>
-                            <option value="true"><?php esc_html_e( 'True', 'proactive-security-suite' ); ?></option>
-                            <option value="false"><?php esc_html_e( 'False', 'proactive-security-suite' ); ?></option>
-                        </select>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-
-            <!-- Action -->
-            <tr valign="top">
-                <th scope="row"><?php esc_html_e( 'Cloudflare Action', 'proactive-security-suite' ); ?></th>
-                <td>
-                    <select name="action">
-                        <option value="block"><?php esc_html_e( 'Block', 'proactive-security-suite' ); ?></option>
-                        <option value="managed_challenge">
-                            <?php esc_html_e( 'Managed Challenge', 'proactive-security-suite' ); ?>
-                        </option>
-                    </select>
-                </td>
-            </tr>
-
-            <!-- Priority -->
-            <tr valign="top">
-                <th scope="row"><?php esc_html_e( 'Priority', 'proactive-security-suite' ); ?></th>
-                <td>
-                    <input type="number" name="priority" min="0" value="0" />
-                    <p class="description">
-                        <?php esc_html_e( 'Higher priority rules are evaluated first.', 'proactive-security-suite' ); ?>
-                    </p>
-                </td>
-            </tr>
-        </table>
-
-        <?php submit_button( __( 'Add Rule', 'proactive-security-suite' ) ); ?>
-    </form>
-    <?php
-}
